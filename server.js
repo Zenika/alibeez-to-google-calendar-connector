@@ -48,7 +48,7 @@ const server = http.createServer((req, res) => {
     });
 
     const googkeTokenRequest = https.request(
-      `https://oauth2.googleapis.com/token?${postData}`,
+      `https://oauth2.googleapis.com/token`,
       {
         method: "POST",
         headers: {

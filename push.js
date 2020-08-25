@@ -156,7 +156,7 @@ async function fetchAccessToken(userAlibeezId) {
 
   return new Promise((resolve, reject) => {
     const googkeTokenRequest = https.request(
-      `https://oauth2.googleapis.com/token?${postData}`,
+      `https://oauth2.googleapis.com/token`,
       {
         method: "POST",
         headers: {
