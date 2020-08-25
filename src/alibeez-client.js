@@ -49,3 +49,10 @@ export async function queryUsers(fields, filters) {
   const responseBody = await parseBodyAsJson(response);
   return responseBody;
 }
+
+export async function getUserByUsername(username) {
+  return  queryUsers(
+    ["uuid", "username"],
+    [`username==${username}`]
+  );
+}
