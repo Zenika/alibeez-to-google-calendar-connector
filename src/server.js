@@ -8,7 +8,7 @@ import { generateRandomState } from "./utils/state";
 import { parseQuery } from "./utils/http";
 import { parseJwtClaims } from "./utils/jwt";
 import { getUserByUsername } from "./alibeez-client";
-import { mappUser } from "./users/user-mapper";
+import { mapUser } from "./users/user-mapper";
 import { userPersistence } from "./user-persistence";
 
 export function createServer() {
@@ -47,7 +47,7 @@ export function createServer() {
         res.end(request.message);
       }
 
-      const user = mappUser(claims, request[0].uuid);
+      const user = mapUser(claims, request[0].uuid);
       await userPersistence.upsert(user);
     } else {
       res.writeHead(404);
