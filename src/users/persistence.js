@@ -1,8 +1,8 @@
 import * as fs from "fs";
 
-export const userPersistence = {
+export const persistence = {
   upsert: async function upsert(user) {
-    const {isValidUser, error} = userPersistence.validateUser(user);
+    const {isValidUser, error} = persistence.validateUser(user);
 
     if (!isValidUser) {
       return error;
