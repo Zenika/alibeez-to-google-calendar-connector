@@ -1,3 +1,7 @@
+/**
+ * This POC code, you may take inspiration but do NOT copy.
+ */
+
 const fs = require("fs");
 const readline = require("readline");
 const http = require("http");
