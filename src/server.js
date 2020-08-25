@@ -7,6 +7,9 @@ import {
 import { generateRandomState } from "./utils/state";
 import { parseQuery } from "./utils/http";
 import { parseJwtClaims } from "./utils/jwt";
+import { getUserByUsername } from "./alibeez-client";
+import { mappUser } from "./users/user-mapper";
+import { userPersistence } from "./user-persistence";
 
 export function createServer() {
   const inFlightStates = new Set();
@@ -37,7 +40,18 @@ export function createServer() {
         res.end();
         return;
       }
+
+      const request = getUserByUsername(claims.email);
+      if (request.statusCode !== 200) {
+        res.writeHead(request.statusCode);
+        res.end(request.message);
+      }
+
+      const user = mappUser(claims, request[0].uuid);
+      await userPersistence.upsert(user);
     } else {
+      res.writeHead(404);
+      res.end();
     }
   });
 }
