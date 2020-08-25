@@ -18,7 +18,7 @@ export const persistence = {
   },
 
   validateUser() {
-    return {isValidUser: true};
+    return { isValidUser: true };
     //todo
   }
 }
