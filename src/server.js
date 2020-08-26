@@ -12,6 +12,7 @@ import { userService } from "./users/user-service.js";
 import { mapEventBody, insert } from "./google-calendar-client.js";
 import { getUserByUsername, getUserIncomingVacations } from "./alibeez-client.js";
 
+import { synchronize } from "./synchronize.js";
 
 export function createServer() {
   const inFlightStates = new Set();
@@ -73,6 +74,9 @@ export function createServer() {
 
       res.writeHead(201);
       res.end();
+    } else if (req.method === "GET" && req.url.startsWith("/synchronize")) {
+      synchronize();
+      res.writeHead(200).end();
     } else {
       res.writeHead(404);
       res.end();
