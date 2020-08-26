@@ -26,14 +26,14 @@ export function createServer() {
       inFlightStates.add(state);
     } else if (req.method === "GET" && req.url.startsWith("/oauth/callback")) {
       const { code, state } = parseQuery(req.url);
-      if (!inFlightAuth.has(Number(state))) {
+      if (!inFlightStates.has(Number(state))) {
         res.writeHead(401);
         res.end();
         return;
       }
-      inFlightAuth.delete(state);
+      inFlightStates.delete(Number(state));
       const tokens = await exchangeCodeForTokens(code);
-      const claims = parseJwtClaims(tokens.id_tokens);
+      const claims = parseJwtClaims(tokens.id_token);
       if (!claimsMatch(claims)) {
         res.writeHead(401);
         res.end();
@@ -42,7 +42,7 @@ export function createServer() {
 
       const request = getUserByUsername(claims.email);
       if (request.statusCode !== 200) {
-        res.writeHead(request.statusCode);
+        res.writeHead(request.statusCode || 500);
         res.end(request.message);
       }
 
