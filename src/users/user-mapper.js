@@ -1,12 +1,10 @@
-export function mapUser(claims, alibeezId) {
+export function mapUser(data) {
   return {
-    email: claims.email,
-    alibeezId: alibeezId,
-    googleId: claims.sub,
-    accessTokenExpiration: new Date(
-      Date.now() + claims.expiresIn * 1000
-    ).toISOString(),
-    accessToken: claims.accessToken,
-    refreshToken: claims.refreshToken,
+    email: data.email,
+    alibeezId: data.alibeezId,
+    googleId: data.sub,
+    accessTokenExpiration: new Date(data.exp * 1000).toISOString(),
+    accessToken: data.accessToken,
+    refreshToken: data.refreshToken,
   }
 }

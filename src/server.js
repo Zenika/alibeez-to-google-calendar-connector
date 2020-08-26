@@ -7,8 +7,8 @@ import {
 import { generateRandomState } from "./utils/state.js";
 import { parseQuery } from "./utils/http.js";
 import { parseJwtClaims } from "./utils/jwt.js";
-import { getUserByUsername } from "./alibeez-client.js";
 import { mapUser } from "./users/user-mapper.js";
+import { userUpsert } from "./users/persistence.js";
 
 export function createServer() {
   const inFlightStates = new Set();
@@ -46,8 +46,17 @@ export function createServer() {
         res.end(request.message);
       }
 
-      const user = mapUser(claims, request[0].uuid);
+      const user = mapUser({
+          ...claims,
+          alibeezId: request.body[0].uuid,
+          accessToken: tokens.access_token,
+          refreshToken: tokens.refresh_token
+        });
+
       await userUpsert(user);
+
+      res.writeHead(201);
+      res.end();
     } else {
       res.writeHead(404);
       res.end();
