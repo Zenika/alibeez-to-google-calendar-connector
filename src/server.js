@@ -3,10 +3,10 @@ import {
   generateAuthUrl,
   exchangeCodeForTokens,
   claimsMatch,
-} from "./google-oauth-client";
-import { generateRandomState } from "./utils/state";
-import { parseQuery } from "./utils/http";
-import { parseJwtClaims } from "./utils/jwt";
+} from "./google-oauth-client.js";
+import { generateRandomState } from "./utils/state.js";
+import { parseQuery } from "./utils/http.js";
+import { parseJwtClaims } from "./utils/jwt.js";
 
 export function createServer() {
   const inFlightStates = new Set();
