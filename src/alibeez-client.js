@@ -1,4 +1,4 @@
-import { request, parseBodyAsJson } from "./http-client";
+import { request, parseBodyAsJson } from "./http-client.js";
 
 const { ALIBEEZ_API_ROOT_URL, ALIBEEZ_KEY } = process.env;
 

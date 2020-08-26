@@ -1,5 +1,5 @@
 import http from "http";
-import { insert, update, remove } from "./google-calendar-client";
+import { insert, update, remove } from "./google-calendar-client.js";
 
 export async function upsert(calendarId, eventId, eventBody, accessToken) {
   try {

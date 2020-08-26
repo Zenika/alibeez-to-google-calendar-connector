@@ -7,12 +7,8 @@ import {
 import { generateRandomState } from "./utils/state.js";
 import { parseQuery } from "./utils/http.js";
 import { parseJwtClaims } from "./utils/jwt.js";
-} from "./google-oauth-client";
-import { generateRandomState } from "./utils/state";
-import { parseQuery } from "./utils/http";
-import { parseJwtClaims } from "./utils/jwt";
-import { getUserByUsername } from "./alibeez-client";
-import { mapUser } from "./users/user-mapper";
+import { getUserByUsername } from "./alibeez-client.js";
+import { mapUser } from "./users/user-mapper.js";
 
 export function createServer() {
   const inFlightStates = new Set();
