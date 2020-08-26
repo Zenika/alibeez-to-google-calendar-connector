@@ -24,20 +24,27 @@ export function createServer() {
       inFlightStates.add(state);
     } else if (req.method === "GET" && req.url.startsWith("/oauth/callback")) {
       const { code, state } = parseQuery(req.url);
-      if (!inFlightAuth.has(Number(state))) {
+      if (!inFlightStates.has(Number(state))) {
         res.writeHead(401);
         res.end();
         return;
       }
-      inFlightAuth.delete(state);
+      inFlightStates.delete(Number(state));
       const tokens = await exchangeCodeForTokens(code);
-      const claims = parseJwtClaims(tokens.id_tokens);
+      const claims = parseJwtClaims(tokens.id_token);
       if (!claimsMatch(claims)) {
         res.writeHead(401);
         res.end();
         return;
       }
+
+      //todo
+
+      res.writeHead(201);
+      res.end();
     } else {
+      res.writeHead(404);
+      res.end();
     }
   });
 }
