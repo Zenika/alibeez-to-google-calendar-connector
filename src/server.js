@@ -41,7 +41,7 @@ export function createServer() {
       }
 
       const request = getUserByUsername(claims.email);
-      if (request.statusCode !== 200) {
+      if (request.statusCode) {
         res.writeHead(request.statusCode || 500);
         res.end(request.message);
       }
