@@ -9,7 +9,6 @@ import { parseQuery } from "./utils/http";
 import { parseJwtClaims } from "./utils/jwt";
 import { getUserByUsername } from "./alibeez-client";
 import { mapUser } from "./users/user-mapper";
-import { persistence } from "./users/persistence";
 
 export function createServer() {
   const inFlightStates = new Set();
@@ -48,7 +47,7 @@ export function createServer() {
       }
 
       const user = mapUser(claims, request[0].uuid);
-      await persistence.upsert(user);
+      await userUpsert(user);
     } else {
       res.writeHead(404);
       res.end();
