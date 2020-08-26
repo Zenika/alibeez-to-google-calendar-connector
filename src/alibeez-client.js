@@ -1,4 +1,5 @@
 import { request, parseBodyAsJson } from "./http-client.js";
+import querystring from "querystring";
 
 const { ALIBEEZ_API_ROOT_URL, ALIBEEZ_KEY } = process.env;
 
@@ -48,11 +49,4 @@ export async function queryUsers(fields, filters) {
   }
   const responseBody = await parseBodyAsJson(response);
   return responseBody;
-}
-
-export async function getUserByUsername(username) {
-  return  queryUsers(
-    ["uuid", "username"],
-    [`username==${username}`]
-  );
 }
