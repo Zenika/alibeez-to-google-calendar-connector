@@ -1,4 +1,4 @@
-import { request, parseBodyAsJson } from "./http-client";
+import { request, parseBodyAsJson } from "./http-client.js";
 
 export async function insert(calendarId, eventBody, accessToken) {
   const requestUrl = `https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events`;
