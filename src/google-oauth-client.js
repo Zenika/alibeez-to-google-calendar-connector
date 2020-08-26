@@ -1,10 +1,11 @@
 import querystring from "querystring";
-import { request, parseBodyAsJson } from "./http-client";
+import { request, parseBodyAsJson } from "./http-client.js";
 
 const {
   GOOGLE_OAUTH2_CLIENT_ID,
   GOOGLE_OAUTH2_CLIENT_SECRET,
   GOOGLE_OAUTH2_CLIENT_REDIRECT_URI,
+  GOOGLE_OAUTH2_CLIENT_HD
 } = process.env;
 
 if (!GOOGLE_OAUTH2_CLIENT_ID) {

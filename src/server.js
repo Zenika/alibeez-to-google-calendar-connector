@@ -3,6 +3,10 @@ import {
   generateAuthUrl,
   exchangeCodeForTokens,
   claimsMatch,
+} from "./google-oauth-client.js";
+import { generateRandomState } from "./utils/state.js";
+import { parseQuery } from "./utils/http.js";
+import { parseJwtClaims } from "./utils/jwt.js";
 } from "./google-oauth-client";
 import { generateRandomState } from "./utils/state";
 import { parseQuery } from "./utils/http";
