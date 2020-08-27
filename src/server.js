@@ -8,7 +8,7 @@ import { generateRandomState } from "./utils/state.js";
 import { parseQuery } from "./utils/http.js";
 import { parseJwtClaims } from "./utils/jwt.js";
 import { mapUser } from "./users/user-mapper.js";
-import { userUpsert } from "./users/persistence.js";
+import { userService } from "./users/user-service.js";
 
 export function createServer() {
   const inFlightStates = new Set();
@@ -53,7 +53,7 @@ export function createServer() {
           refreshToken: tokens.refresh_token
         });
 
-      await userUpsert(user);
+      await userService.upsert(user);
 
       res.writeHead(201);
       res.end();
