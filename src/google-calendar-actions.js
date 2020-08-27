@@ -6,7 +6,7 @@ export async function upsert(calendarId, eventId, eventBody, accessToken) {
     return await update(calendarId, eventId, eventBody, accessToken);
   } catch (err) {
     if (err instanceof http.IncomingMessage && err.statusCode === 404) {
-      return await insert(calendarId, eventBody, accessToken);
+      return await insert(calendarId, {id: eventId, ...eventBody}, accessToken);
     } else {
       throw err;
     }

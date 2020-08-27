@@ -2,7 +2,9 @@ import fs from "fs";
 
 export const userService = {
   upsert: async (user) => {
-    await fs.promises.mkdir(`data/users/${user.alibeezId}`, { recursive: true });
+    await fs.promises.mkdir(`data/users/${user.alibeezId}`, {
+      recursive: true,
+    });
 
     await fs.promises.writeFile(
       `data/users/${user.alibeezId}/info.json`,
@@ -10,7 +12,7 @@ export const userService = {
         email: user.email,
         alibeezId: user.alibeezId,
         googleId: user.googleId,
-        refreshToken: user.refreshToken
+        refreshToken: user.refreshToken,
       })
     );
 
@@ -29,7 +31,7 @@ export const userService = {
       `data/users/${alibeezId}/token.json`,
       JSON.stringify({
         accessTokenExpiration: token.accessTokenExpiration,
-        accessToken: token.accessToken
+        accessToken: token.accessToken,
       })
     );
     return token;
@@ -44,8 +46,10 @@ export const userService = {
   },
 
   getUserTokenFromAlibeezId: (alibeezId) => {
-    return JSON.parse(fs.readFileSync(`data/users/${alibeezId}/token.json`));
-  }
-}
-
-
+    try {
+      return JSON.parse(fs.readFileSync(`data/users/${alibeezId}/token.json`));
+    } catch (err) {
+      return;
+    }
+  },
+};

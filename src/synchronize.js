@@ -8,14 +8,12 @@
 */
 
 import fs from "fs";
+import http from "http";
 import { exchangeRefreshTokenForAccessToken } from "./google-oauth-client.js";
 import { queryLeaves } from "./alibeez-client.js";
 import { upsert, removeIfExists } from "./google-calendar-actions.js";
-import {
-  getUserTokenFromAlibeezId,
-  getRefreshTokenFromAlibeezId,
-  updateUserToken
-} from "./users/user-service.js";
+import { mapEventBody } from "./google-calendar-client.js";
+import { userService } from "./users/user-service.js";
 
 const LAST_CRON_FILE_PATH = process.env.LAST_CRON_FILE_PATH;
 if (!LAST_CRON_FILE_PATH) {
@@ -73,30 +71,43 @@ export const synchronize = async () => {
         ? `updateDate>${computeDateStringForAlibeez(lastCronTime)}`
         : `updateDate>${computeDateStringForAlibeez(cronStartTimeString)}`
     );
-    console.log("changesSinceLastCron", changesSinceLastCron);
     changesSinceLastCron.result.forEach(async (leave) => {
       try {
-        const user = getUserTokenFromAlibeezId(leave.userUuid);
+        const user = userService.getUserTokenFromAlibeezId(leave.userUuid);
+        if (!user) {
+          return;
+        }
         const currentDate = new Date();
         const expiration = new Date(user.accessTokenExpiration);
         if (currentDate - expiration < 60 * 1000) {
-          const refreshToken = getRefreshTokenFromAlibeezId(leave.userUuid);
+          const refreshToken = userService.getRefreshTokenFromAlibeezId(
+            leave.userUuid
+          );
           const {
             access_token,
             expires_in,
           } = await exchangeRefreshTokenForAccessToken(refreshToken);
           user.accessToken = access_token;
           user.accessTokenExpiration = expires_in;
-          await updateUserToken(leave.userUuid, user);
+          await userService.updateUserToken(leave.userUuid, user);
         }
         if (
           leave.status === "CANCEL_PENDING" ||
           leave.status === "CANCELED" ||
           leave.status === "REJECTED"
         ) {
-          await removeIfExists("primary", `alibeez_${leave.uuid}`, user.accessToken);
+          await removeIfExists(
+            "primary",
+            `alibeev${leave.uuid}`,
+            user.accessToken
+          );
         } else if (leave.status === "APPROVED" || leave.status === "PENDING") {
-          await upsert("primary", `alibeez_${leave.uuid}`, {}, user.accessToken);
+          await upsert(
+            "primary",
+            `alibeev${leave.uuid}`,
+            mapEventBody(leave),
+            user.accessToken
+          );
         } else {
           console.error(
             "ERROR: couldn't update leave, status uknown",
@@ -104,10 +115,18 @@ export const synchronize = async () => {
           );
         }
       } catch (err) {
-        console.error("Error while synchronizing: ", err);
+        console.error(
+          "Error while synchronizing: ",
+          err instanceof http.IncomingMessage ? err.statusCode : err
+        );
+        let body;
+        for await (const chunk of err) {
+           body += chunk.toString();
+        }
+        console.error("body", body)
       }
     });
-    await fs.promises.writeFile(LAST_CRON_FILE_PATH, cronStartTimeString);
+    //await fs.promises.writeFile(LAST_CRON_FILE_PATH, cronStartTimeString);
   } catch (err) {
     console.error("top level catch", err);
   }
