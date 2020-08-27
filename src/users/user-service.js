@@ -9,7 +9,8 @@ export const userService = {
       JSON.stringify({
         email: user.email,
         alibeezId: user.alibeezId,
-        googleId: user.googleId
+        googleId: user.googleId,
+        refreshToken: user.refreshToken
       })
     );
 
@@ -18,7 +19,6 @@ export const userService = {
       JSON.stringify({
         accessTokenExpiration: user.accessTokenExpiration,
         accessToken: user.accessToken,
-        refreshToken: user.refreshToken
       })
     );
     return user;
@@ -29,28 +29,14 @@ export const userService = {
       `data/users/${alibeezId}/token.json`,
       JSON.stringify({
         accessTokenExpiration: token.accessTokenExpiration,
-        accessToken: token.accessToken,
-        refreshToken: token.refreshToken
+        accessToken: token.accessToken
       })
     );
     return token;
   },
 
-  getAllUsers: async () => {
-    const userSet = new Set();
-    const files = await fs.promises.readdir(`data/users`);
-
-    files
-      .forEach((alibeezId) => {
-      const userInfo = userService.getUserInfoFromAlibeezId(alibeezId);
-      const userToken = userService.getUserTokenFromAlibeezId(alibeezId);
-      userSet.add({
-        ...userInfo,
-        ...userToken
-      });
-    });
-
-    return [...userSet];
+  getRefreshTokenFromAlibeezId: (alibeezId) => {
+    return userService.getUserInfoFromAlibeezId(alibeezId).refreshToken;
   },
 
   getUserInfoFromAlibeezId: (alibeezId) => {
