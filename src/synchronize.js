@@ -83,11 +83,14 @@ export const synchronize = async () => {
         const user = retrieveUser(leave.userUuid);
         const currentDate = new Date();
         const expiration = new Date(user.accessTokenExpiration);
-        if (currentDate - expiration < 60 * 60 * 1000) {
+        if (currentDate - expiration < 60 * 1000) {
           // I have to mock this too since I have no info on users
-          /* user.accessToken = await exchangeRefreshTokenForAccessToken(
-          user.refreshToken
-        );*/
+          /* const refreshObject = await exchangeRefreshTokenForAccessToken(
+            user.refreshToken
+          );
+          user.accessToken = refreshObject.accessToken
+          user.refreshToken = refreshObject.refreshToken
+          */
         }
         if (
           leave.status === "CANCEL_PENDING" ||
@@ -95,10 +98,10 @@ export const synchronize = async () => {
           leave.status === "REJECTED"
         ) {
           //delete the event
-          //removeIfExists("primary", leave.uuid, user.accessToken);
-        } else if (leave.status === "APPROVED" || eave.status === "PENDING") {
+          //removeIfExists("primary", `alibeez_${leave.uuid}`, user.accessToken);
+        } else if (leave.status === "APPROVED" || leave.status === "PENDING") {
           // upsert the event
-          //upsert("primary", leave.uuid, "Leave of abscence", user.accessToken);
+          //upsert("primary", `alibeez_${leave.uuid}`, "Leave of abscence", user.accessToken);
         } else {
           console.error(
             "ERROR: couldn't update leave, status uknown",
