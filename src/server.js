@@ -9,6 +9,9 @@ import { parseQuery } from "./utils/http.js";
 import { parseJwtClaims } from "./utils/jwt.js";
 import { mapUser } from "./users/user-mapper.js";
 import { userService } from "./users/user-service.js";
+import { mapEventBody, insert } from "./google-calendar-client.js";
+import { getUserByUsername, getUserIncomingVacations } from "./alibeez-client.js";
+
 
 export function createServer() {
   const inFlightStates = new Set();
@@ -40,16 +43,19 @@ export function createServer() {
         return;
       }
 
-      const request = getUserByUsername(claims.email);
+      const request = await getUserByUsername(claims.email);
       if (request.statusCode) {
         res.writeHead(request.statusCode || 500);
         res.end(request.message);
       }
 
+      const alibeezId = request.result[0].uuid;
+      const accessToken = tokens.access_token;
+
       const user = mapUser({
           ...claims,
-          alibeezId: request.body[0].uuid,
-          accessToken: tokens.access_token,
+          alibeezId: alibeezId,
+          accessToken: accessToken,
           refreshToken: tokens.refresh_token
         });
 
