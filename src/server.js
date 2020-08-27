@@ -61,6 +61,16 @@ export function createServer() {
 
       await userService.upsert(user);
 
+      const vacations = await getUserIncomingVacations(alibeezId);
+
+      vacations.forEach(vacation =>
+        insert(
+          "primary",
+          mapEventBody(vacation),
+          accessToken
+        )
+      );
+
       res.writeHead(201);
       res.end();
     } else {

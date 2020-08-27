@@ -16,11 +16,11 @@ if (!ALIBEEZ_KEY) {
 }
 
 export async function queryLeaves(fields, filters) {
-  const query = querystring.stringify({
-    key: ALIBEEZ_KEY,
-    fields: fields.join(","),
-    filter: filters,
-  });
+  const query =
+    `key=${ALIBEEZ_KEY}`
+    + `&fields=${fields.join(',')}`
+    + filters.map(filter => `&filter=${encodeURIComponent(filter)}`).join('');
+
   const requestUrl = `${ALIBEEZ_API_ROOT_URL}/query/leaves/requests?${query}`;
   const requestOptions = {
     method: "GET",
