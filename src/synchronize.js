@@ -11,6 +11,11 @@ import fs from "fs";
 import { exchangeRefreshTokenForAccessToken } from "./google-oauth-client.js";
 import { queryLeaves } from "./alibeez-client.js";
 import { upsert, removeIfExists } from "./google-calendar-actions.js";
+import {
+  getUserTokenFromAlibeezId,
+  getRefreshTokenFromAlibeezId,
+  updateUserToken
+} from "./users/user-service.js";
 
 const LAST_CRON_FILE_PATH = process.env.LAST_CRON_FILE_PATH;
 if (!LAST_CRON_FILE_PATH) {
@@ -44,15 +49,6 @@ const getLastCronTime = async (filePath) => {
   }
 };
 
-const retrieveUser = (userUuid) => ({
-  email: "example@zenika.com",
-  alibeezId: "alibeezId",
-  googleId: "sub",
-  accessTokenExpiration: new Date(1598606952 * 1000).toISOString(),
-  accessToken: "accessToken",
-  refreshToken: "refreshToken",
-}); // TODO
-
 const computeDateStringForAlibeez = (dateString) =>
   dateString.slice(0, dateString.length - 2);
 
@@ -80,28 +76,27 @@ export const synchronize = async () => {
     console.log("changesSinceLastCron", changesSinceLastCron);
     changesSinceLastCron.result.forEach(async (leave) => {
       try {
-        const user = retrieveUser(leave.userUuid);
+        const user = getUserTokenFromAlibeezId(leave.userUuid);
         const currentDate = new Date();
         const expiration = new Date(user.accessTokenExpiration);
         if (currentDate - expiration < 60 * 1000) {
-          // I have to mock this too since I have no info on users
-          /* const refreshObject = await exchangeRefreshTokenForAccessToken(
-            user.refreshToken
-          );
-          user.accessToken = refreshObject.accessToken
-          user.refreshToken = refreshObject.refreshToken
-          */
+          const refreshToken = getRefreshTokenFromAlibeezId(leave.userUuid);
+          const {
+            access_token,
+            expires_in,
+          } = await exchangeRefreshTokenForAccessToken(refreshToken);
+          user.accessToken = access_token;
+          user.accessTokenExpiration = expires_in;
+          await updateUserToken(leave.userUuid, user);
         }
         if (
           leave.status === "CANCEL_PENDING" ||
           leave.status === "CANCELED" ||
           leave.status === "REJECTED"
         ) {
-          //delete the event
-          //removeIfExists("primary", `alibeez_${leave.uuid}`, user.accessToken);
+          await removeIfExists("primary", `alibeez_${leave.uuid}`, user.accessToken);
         } else if (leave.status === "APPROVED" || leave.status === "PENDING") {
-          // upsert the event
-          //upsert("primary", `alibeez_${leave.uuid}`, "Leave of abscence", user.accessToken);
+          await upsert("primary", `alibeez_${leave.uuid}`, {}, user.accessToken);
         } else {
           console.error(
             "ERROR: couldn't update leave, status uknown",
