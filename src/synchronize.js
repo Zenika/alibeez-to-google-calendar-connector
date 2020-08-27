@@ -10,6 +10,7 @@
 import fs from "fs";
 import { exchangeRefreshTokenForAccessToken } from "./google-oauth-client.js";
 import { queryLeaves } from "./alibeez-client.js";
+import { upsert, removeIfExists } from "./google-calendar-actions.js";
 
 const LAST_CRON_FILE_PATH = process.env.LAST_CRON_FILE_PATH;
 if (!LAST_CRON_FILE_PATH) {
@@ -52,32 +53,64 @@ const retrieveUser = (userUuid) => ({
   refreshToken: "refreshToken",
 }); // TODO
 
-export const synchronize = async () => {
-  const lastCronTime = await getLastCronTime(LAST_CRON_FILE_PATH);
-  const changesSinceLastCron = queryLeavesMock(
-    [
-      "uuid",
-      "userUuid",
-      "updateDate",
-      "status",
-      "startDay",
-      "startDayTime",
-      "endDay",
-      "endDayTime",
-    ],
-    lastCronTime ? `updateDate>${lastCronTime}` : ""
-  );
-  changesSinceLastCron.forEach((leave) => {
-    try {
-      const user = retrieveUser(leave.userUuid);
-      const currentDate = new Date()
-      const expiration = new Date(user.accessTokenExpiration)
-      if(currentDate - expiration < 0) {
-        user.accessToken = exchangeRefreshTokenForAccessToken(user.refreshToken)
-      }
+const computeDateStringForAlibeez = (dateString) =>
+  dateString.slice(0, dateString.length - 2);
 
-    } catch (err) {
-      console.error("Error while synchronizing: ", err)
-    }
-  });
+export const synchronize = async () => {
+  try {
+    const lastCronTime = await getLastCronTime(LAST_CRON_FILE_PATH);
+    console.log("lastCronTime", new Date().toISOString());
+    const cronStartTime = new Date();
+    const cronStartTimeString = cronStartTime.toISOString();
+    const changesSinceLastCron = await queryLeaves(
+      [
+        "uuid",
+        "userUuid",
+        "updateDate",
+        "status",
+        "startDay",
+        "startDayTime",
+        "endDay",
+        "endDayTime",
+      ],
+      lastCronTime
+        ? `updateDate>${computeDateStringForAlibeez(lastCronTime)}`
+        : `updateDate>${computeDateStringForAlibeez(cronStartTimeString)}`
+    );
+    console.log("changesSinceLastCron", changesSinceLastCron);
+    changesSinceLastCron.result.forEach(async (leave) => {
+      try {
+        const user = retrieveUser(leave.userUuid);
+        const currentDate = new Date();
+        const expiration = new Date(user.accessTokenExpiration);
+        if (currentDate - expiration < 60 * 60 * 1000) {
+          // I have to mock this too since I have no info on users
+          /* user.accessToken = await exchangeRefreshTokenForAccessToken(
+          user.refreshToken
+        );*/
+        }
+        if (
+          leave.status === "CANCEL_PENDING" ||
+          leave.status === "CANCELED" ||
+          leave.status === "REJECTED"
+        ) {
+          //delete the event
+          //removeIfExists("primary", leave.uuid, user.accessToken);
+        } else if (leave.status === "APPROVED" || eave.status === "PENDING") {
+          // upsert the event
+          //upsert("primary", leave.uuid, "Leave of abscence", user.accessToken);
+        } else {
+          console.error(
+            "ERROR: couldn't update leave, status uknown",
+            leave.status
+          );
+        }
+      } catch (err) {
+        console.error("Error while synchronizing: ", err);
+      }
+    });
+    await fs.promises.writeFile(LAST_CRON_FILE_PATH, cronStartTimeString);
+  } catch (err) {
+    console.error("top level catch", err);
+  }
 };
