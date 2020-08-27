@@ -51,3 +51,40 @@ export async function remove(calendarId, eventId, accessToken) {
   const responseBody = await parseBodyAsJson(response);
   return responseBody;
 }
+
+export function mapEventBody(item) {
+    return {
+      start: {
+        dateTime: alibeezTimeToRealTime(
+          item.startDay,
+          item.startDayTime
+        ).toISOString(),
+        timeZone: "Europe/Paris",
+      },
+      end: {
+        dateTime: alibeezTimeToRealTime(
+          item.endDay,
+          item.endDayTime
+        ).toISOString(),
+        timeZone: "Europe/Paris",
+      },
+      summary: "Congés (test, ignorer)",
+    };
+}
+
+function alibeezTimeToRealTime(alibeezDate, alibeezTime) {
+  if (alibeezTime === "MORNING") {
+    const date = new Date(alibeezDate);
+    date.setHours(9);
+    return date;
+  } else if (alibeezTime === "NOON") {
+    const date = new Date(alibeezDate);
+    date.setHours(13);
+    return date;
+  } else if (alibeezTime === "EVENING") {
+    const date = new Date(alibeezDate);
+    date.setHours(18);
+    return date;
+  }
+  throw new Error(`invalid alibeez time: ${alibeezTime}`);
+}
