@@ -21,6 +21,7 @@ export const userService = {
         refreshToken: user.refreshToken
       })
     );
+    return user;
   },
 
   updateUserToken: async (alibeezId, token) => {
@@ -32,6 +33,7 @@ export const userService = {
         refreshToken: token.refreshToken
       })
     );
+    return token;
   },
 
   getAllUsers: async () => {
