@@ -8,6 +8,7 @@
 */
 
 import fs from "fs";
+import { exchangeRefreshTokenForAccessToken } from "./google-oauth-client.js";
 import { queryLeaves } from "./alibeez-client.js";
 
 const LAST_CRON_FILE_PATH = process.env.LAST_CRON_FILE_PATH;
@@ -15,19 +16,21 @@ if (!LAST_CRON_FILE_PATH) {
   throw new Error("ERROR: Missing env variable LAST_CRON_FILE_PATH");
 }
 
-const queryLeavesMock = (fields,filters) => {
-  const mockData = [{
-    uuid: "25c5bfdc-50cc-435d-af15-0638a20d9322",
-    userUuid: "89d50865-2497-401e-82f3-d362c3f5394c",
-    updateDate: "08/26/2020",
-    status: "APPROVED",
-    startDate: "08/27/2020",
-    startDayTime: "MORNING",
-    endDay: "08/29/2020",
-    endDayTime: "EVENING"
-  }];
-  return mockData
-}
+const queryLeavesMock = (fields, filters) => {
+  const mockData = [
+    {
+      uuid: "25c5bfdc-50cc-435d-af15-0638a20d9322",
+      userUuid: "89d50865-2497-401e-82f3-d362c3f5394c",
+      updateDate: "08/26/2020",
+      status: "APPROVED",
+      startDate: "08/27/2020",
+      startDayTime: "MORNING",
+      endDay: "08/29/2020",
+      endDayTime: "EVENING",
+    },
+  ];
+  return mockData;
+};
 
 const getLastCronTime = async (filePath) => {
   if (!filePath) {
@@ -39,6 +42,15 @@ const getLastCronTime = async (filePath) => {
     return; // in case no file was found return undefined ?
   }
 };
+
+const retrieveUser = (userUuid) => ({
+  email: "example@zenika.com",
+  alibeezId: "alibeezId",
+  googleId: "sub",
+  accessTokenExpiration: new Date(1598606952 * 1000).toISOString(),
+  accessToken: "accessToken",
+  refreshToken: "refreshToken",
+}); // TODO
 
 export const synchronize = async () => {
   const lastCronTime = await getLastCronTime(LAST_CRON_FILE_PATH);
@@ -55,5 +67,17 @@ export const synchronize = async () => {
     ],
     lastCronTime ? `updateDate>${lastCronTime}` : ""
   );
+  changesSinceLastCron.forEach((leave) => {
+    try {
+      const user = retrieveUser(leave.userUuid);
+      const currentDate = new Date()
+      const expiration = new Date(user.accessTokenExpiration)
+      if(currentDate - expiration < 0) {
+        user.accessToken = exchangeRefreshTokenForAccessToken(user.refreshToken)
+      }
 
+    } catch (err) {
+      console.error("Error while synchronizing: ", err)
+    }
+  });
 };
