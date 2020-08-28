@@ -45,7 +45,7 @@ export async function getUserIncomingVacations(userAlibeezId) {
     "endDayTime",
   ]
   const today = new Date().toISOString().split('T')[0];
-  const filters = [`endDate>=${today}`, `userUuid==${userAlibeezId}`];
+  const filters = [`endDate>=${today}MORNING`, `userUuid==${userAlibeezId}`];
   return await queryLeaves(fields, filters);
 }
 

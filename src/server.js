@@ -9,8 +9,12 @@ import { parseQuery } from "./utils/http.js";
 import { parseJwtClaims } from "./utils/jwt.js";
 import { mapUser } from "./users/user-mapper.js";
 import { userService } from "./users/user-service.js";
-import { mapEventBody, insert } from "./google-calendar-client.js";
-import { getUserByUsername, getUserIncomingVacations } from "./alibeez-client.js";
+import { mapEventBody } from "./google-calendar-client.js";
+import { upsert } from "./google-calendar-actions.js";
+import {
+  getUserByUsername,
+  getUserIncomingVacations,
+} from "./alibeez-client.js";
 
 import { synchronize } from "./synchronize.js";
 
@@ -54,24 +58,35 @@ export function createServer() {
       const accessToken = tokens.access_token;
 
       const user = mapUser({
-          ...claims,
-          alibeezId: alibeezId,
-          accessToken: accessToken,
-          refreshToken: tokens.refresh_token
-        });
+        ...claims,
+        alibeezId: alibeezId,
+        accessToken: accessToken,
+        refreshToken: tokens.refresh_token,
+      });
 
       await userService.upsert(user);
+      try {
+        const leaves = await getUserIncomingVacations(alibeezId);
 
-      // const vacations = await getUserIncomingVacations(alibeezId);
-
-      // vacations.forEach(vacation =>
-      //   insert(
-      //     "primary",
-      //     mapEventBody(vacation),
-      //     accessToken
-      //   )
-      // );
-
+        leaves.result.forEach((leave) =>
+          upsert(
+            "primary",
+            `alibeev${leave.uuid}`,
+            mapEventBody(leave),
+            accessToken
+          )
+        );
+      } catch (err) {
+        console.error(
+          "Error while initing: ",
+          err instanceof http.IncomingMessage ? err.statusCode : err
+        );
+        let body;
+        for await (const chunk of err) {
+          body += chunk.toString();
+        }
+        console.error("body", body);
+      }
       res.writeHead(201);
       res.end();
     } else if (req.method === "GET" && req.url.startsWith("/synchronize")) {
