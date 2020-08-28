@@ -28,4 +28,5 @@ export async function setupUser(code) {
     token: tokens.access_token,
     expiresAt: new Date(claims.exp * 1000).toISOString(),
   });
+  return { alibeezId, accessToken: tokens.access_token };
 }

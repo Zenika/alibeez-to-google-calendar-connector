@@ -21,11 +21,16 @@ export async function syncIncremental() {
     const lastCronTime = await getLastCronTime(LAST_CRON_FILE_PATH);
     const cronStartTimeString = new Date().toISOString();
     const changesSinceLastCron = await queryLeaves([
-      computeDateStringForAlibeez(lastCronTime || cronStartTimeString),
+      `updateDate>=${computeDateStringForAlibeez(
+        lastCronTime || cronStartTimeString
+      )}`,
     ]);
     for (const leave of changesSinceLastCron.result) {
       try {
         const accessToken = await fetchOrRenewAccessToken(leave.userUuid);
+        if (!accessToken) {
+          continue;
+        }
         await pushToGoogleCalendar(leave, accessToken);
       } catch (err) {
         console.error(
