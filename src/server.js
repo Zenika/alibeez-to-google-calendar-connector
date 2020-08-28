@@ -13,9 +13,12 @@ export function createServer() {
       oauthAuthorizeHandler(req, res, inFlightStates);
     } else if (req.method === "GET" && req.url.startsWith("/oauth/callback")) {
       await oauthCallbackHandler(req, res, inFlightStates);
-    // TODO: split out /sync/init route when we have a cookie to authenticate
-    // } else if (req.method === "GET" && req.url.startsWith("/sync/init")) {
-    } else if (req.method === "GET" && req.url.startsWith("/sync/incremental")) {
+      // TODO: split out /sync/init route when we have a cookie to authenticate
+      // } else if (req.method === "GET" && req.url.startsWith("/sync/init")) {
+    } else if (
+      req.method === "GET" &&
+      req.url.startsWith("/sync/incremental")
+    ) {
       await syncIncrementalHandler(req, res);
     } else {
       res.writeHead(404);
@@ -61,6 +64,11 @@ async function oauthCallbackHandler(req, res, inFlightStates) {
 }
 
 async function syncIncrementalHandler(req, res) {
-  await synchronize();
-  res.writeHead(200).end();
+  try {
+    await synchronize();
+    res.writeHead(200).end();
+  } catch (err) {
+    res.writeHead(500);
+    res.end();
+  }
 }
