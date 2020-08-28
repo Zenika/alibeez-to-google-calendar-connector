@@ -1,4 +1,4 @@
-import { queryLeaves as queryLeavesWithFields } from "./alibeez-client";
+import { queryLeaves as queryLeavesWithFields } from "./alibeez-client.js";
 
 export async function queryLeaves(filters) {
   return queryLeavesWithFields(

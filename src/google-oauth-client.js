@@ -1,4 +1,4 @@
-import querystring from "querystring";
+import * as querystring from "querystring";
 import { request, parseBodyAsJson } from "./http-client.js";
 
 const {

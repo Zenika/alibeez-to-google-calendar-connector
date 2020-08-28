@@ -1,4 +1,4 @@
-import https from "https";
+import * as https from "https";
 
 export function request(url, options, body) {
   const effectiveOptions = body
