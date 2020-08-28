@@ -3,6 +3,11 @@ import * as http from "http";
 import { exchangeRefreshTokenForAccessToken } from "./google-oauth-client.js";
 import { queryLeaves } from "./alibeez-client.js";
 import { userService } from "./users/user-service.js";
+import {
+  fetchAccessToken,
+  fetchRefreshToken,
+  saveAccessToken,
+} from "./users/user-service.js";
 import { pushToGoogleCalendar } from "./push.js";
 
 const { LAST_CRON_FILE_PATH } = process.env;
@@ -34,27 +39,8 @@ export async function syncIncremental() {
     );
     for (const leave of changesSinceLastCron.result) {
       try {
-        const user = userService.getUserTokenFromAlibeezId(leave.userUuid);
-        if (!user) {
-          continue;
-        }
-        const currentDate = new Date();
-        const expiration = new Date(user.accessTokenExpiration);
-        if (currentDate.getTime() - expiration.getTime() < 60 * 1000) {
-          const refreshToken = userService.getRefreshTokenFromAlibeezId(
-            leave.userUuid
-          );
-          const {
-            access_token,
-            expires_in,
-          } = await exchangeRefreshTokenForAccessToken(refreshToken);
-          user.accessToken = access_token;
-          user.accessTokenExpiration = new Date(
-            Date.now() + expires_in * 1000
-          ).toISOString();
-          await userService.updateUserToken(leave.userUuid, user);
-        }
-        await pushToGoogleCalendar(leave, user.accessToken);
+        const accessToken = await fetchOrRenewAccessToken(leave.userUuid);
+        await pushToGoogleCalendar(leave, accessToken);
       } catch (err) {
         console.error(
           "Error while synchronizing: ",
@@ -80,6 +66,28 @@ export async function syncIncremental() {
     console.error("body", body);
   }
   console.log("synchronize finished");
+}
+
+async function fetchOrRenewAccessToken(userId) {
+  const accessTokenInfo = await fetchAccessToken(userId);
+  if (!accessTokenInfo) {
+    return null;
+  }
+  const currentTime = new Date().getTime();
+  const expiresAt = new Date(accessTokenInfo.expiresAt).getTime();
+  const timeRemaining = currentTime - expiresAt;
+  if (timeRemaining >= 60 * 1000 /* 1 minute */) {
+    return accessTokenInfo.token;
+  }
+  const refreshToken = await fetchRefreshToken(userId);
+  const { access_token, expires_in } = await exchangeRefreshTokenForAccessToken(
+    refreshToken
+  );
+  await saveAccessToken(userId, {
+    token: access_token,
+    expiresAt: new Date(Date.now() + expires_in * 1000).toISOString(),
+  });
+  return access_token;
 }
 
 const getLastCronTime = async (filePath) => {

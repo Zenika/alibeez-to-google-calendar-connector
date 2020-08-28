@@ -1,7 +1,11 @@
 import { parseJwtClaims } from "./utils/jwt.js";
 import { exchangeCodeForTokens, claimsMatch } from "./google-oauth-client.js";
 import { getUserByUsername } from "./alibeez-client.js";
-import { userService } from "./users/user-service.js";
+import {
+  saveUserInfo,
+  saveRefreshToken,
+  saveAccessToken,
+} from "./users/user-service.js";
 
 export async function setupUser(code) {
   const tokens = await exchangeCodeForTokens(code);
@@ -10,13 +14,15 @@ export async function setupUser(code) {
     return null;
   }
   const request = await getUserByUsername(claims.email);
-  const user = {
+  const alibeezId = request.result[0].uuid;
+  await saveUserInfo(alibeezId, {
     email: claims.email,
-    alibeezId: request.result[0].uuid,
+    alibeezId,
     googleId: claims.sub,
-    accessTokenExpiration: new Date(claims.exp * 1000).toISOString(),
-    accessToken: tokens.access_token,
-    refreshToken: tokens.refresh_token,
-  };
-  return await userService.upsert(user);
+  });
+  await saveRefreshToken(alibeezId, tokens.refresh_token);
+  await saveAccessToken(alibeezId, {
+    token: tokens.access_token,
+    expiresAt: new Date(claims.exp * 1000).toISOString(),
+  });
 }

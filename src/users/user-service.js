@@ -1,55 +1,74 @@
-import fs from "fs";
+import * as fs from "fs";
+import * as path from "path";
 
-export const userService = {
-  upsert: async (user) => {
-    await fs.promises.mkdir(`data/users/${user.alibeezId}`, {
-      recursive: true,
-    });
+const { USER_DIR = "data/users" } = process.env;
+const INFO_FILE_NAME = "info.json";
+const REFRESH_TOKEN_FILE_NAME = "refresh_token.json";
+const ACCESS_TOKEN_FILE_NAME = "access_token.json";
 
-    await fs.promises.writeFile(
-      `data/users/${user.alibeezId}/info.json`,
-      JSON.stringify({
-        email: user.email,
-        alibeezId: user.alibeezId,
-        googleId: user.googleId,
-        refreshToken: user.refreshToken,
-      })
+export async function saveUserInfo(id, info) {
+  await fs.promises.mkdir(path.join(USER_DIR, id), {
+    recursive: true,
+  });
+  await fs.promises.writeFile(
+    path.join(USER_DIR, id, INFO_FILE_NAME),
+    JSON.stringify({
+      info,
+      createdAt: new Date().toISOString(),
+    })
+  );
+}
+
+export async function fetchRefreshToken(id) {
+  try {
+    const content = await fs.promises.readFile(
+      path.join(USER_DIR, id, REFRESH_TOKEN_FILE_NAME)
     );
-
-    await fs.promises.writeFile(
-      `data/users/${user.alibeezId}/token.json`,
-      JSON.stringify({
-        accessTokenExpiration: user.accessTokenExpiration,
-        accessToken: user.accessToken,
-      })
-    );
-    return user;
-  },
-
-  updateUserToken: async (alibeezId, token) => {
-    await fs.promises.writeFile(
-      `data/users/${alibeezId}/token.json`,
-      JSON.stringify({
-        accessTokenExpiration: token.accessTokenExpiration,
-        accessToken: token.accessToken,
-      })
-    );
-    return token;
-  },
-
-  getRefreshTokenFromAlibeezId: (alibeezId) => {
-    return userService.getUserInfoFromAlibeezId(alibeezId).refreshToken;
-  },
-
-  getUserInfoFromAlibeezId: (alibeezId) => {
-    return JSON.parse(fs.readFileSync(`data/users/${alibeezId}/info.json`));
-  },
-
-  getUserTokenFromAlibeezId: (alibeezId) => {
-    try {
-      return JSON.parse(fs.readFileSync(`data/users/${alibeezId}/token.json`));
-    } catch (err) {
-      return;
+    return JSON.parse(content.toString()).token;
+  } catch (err) {
+    if (err.code === "ENOENT") {
+      return null;
     }
-  },
-};
+    throw err;
+  }
+}
+
+export async function saveRefreshToken(id, token) {
+  await fs.promises.mkdir(path.join(USER_DIR, id), {
+    recursive: true,
+  });
+  await fs.promises.writeFile(
+    path.join(USER_DIR, id, REFRESH_TOKEN_FILE_NAME),
+    JSON.stringify({
+      token,
+      createdAt: new Date().toISOString(),
+    })
+  );
+}
+
+export async function fetchAccessToken(id) {
+  try {
+    const content = await fs.promises.readFile(
+      path.join(USER_DIR, id, ACCESS_TOKEN_FILE_NAME)
+    );
+    return JSON.parse(content.toString()).accessTokenInfo;
+  } catch (err) {
+    if (err.code === "ENOENT") {
+      return null;
+    }
+    throw err;
+  }
+}
+
+export async function saveAccessToken(id, accessTokenInfo) {
+  await fs.promises.mkdir(path.join(USER_DIR, id), {
+    recursive: true,
+  });
+  await fs.promises.writeFile(
+    path.join(USER_DIR, id, ACCESS_TOKEN_FILE_NAME),
+    JSON.stringify({
+      accessTokenInfo,
+      updatedAt: new Date().toISOString(),
+    })
+  );
+}
