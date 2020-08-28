@@ -9,8 +9,7 @@ import { parseQuery } from "./utils/http.js";
 import { parseJwtClaims } from "./utils/jwt.js";
 import { mapUser } from "./users/user-mapper.js";
 import { userService } from "./users/user-service.js";
-import { mapEventBody } from "./google-calendar-client.js";
-import { upsert } from "./google-calendar-actions.js";
+import { pushToGoogleCalendar } from "./push.js";
 import {
   getUserByUsername,
   getUserIncomingVacations,
@@ -66,16 +65,10 @@ export function createServer() {
 
       await userService.upsert(user);
       try {
-        const leaves = await getUserIncomingVacations(alibeezId);
-
-        leaves.result.forEach((leave) =>
-          upsert(
-            "primary",
-            `alibeev${leave.uuid}`,
-            mapEventBody(leave),
-            accessToken
-          )
-        );
+        const { result: leaves } = await getUserIncomingVacations(alibeezId);
+        for (const leave of leaves) {
+          await pushToGoogleCalendar(leave, accessToken);
+        }
       } catch (err) {
         console.error(
           "Error while initing: ",
