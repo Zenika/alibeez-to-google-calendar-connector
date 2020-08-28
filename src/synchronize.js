@@ -7,8 +7,8 @@
 - store the datetime corresponding to the cron start
 */
 
-import fs from "fs";
-import http from "http";
+import * as fs from "fs";
+import * as http from "http";
 import { exchangeRefreshTokenForAccessToken } from "./google-oauth-client.js";
 import { queryLeaves } from "./alibeez-client.js";
 import { userService } from "./users/user-service.js";
