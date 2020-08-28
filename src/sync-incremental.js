@@ -1,8 +1,7 @@
 import * as fs from "fs";
 import * as http from "http";
 import { exchangeRefreshTokenForAccessToken } from "./google-oauth-client.js";
-import { queryLeaves } from "./alibeez-client.js";
-import { userService } from "./users/user-service.js";
+import { queryLeaves } from "./alibeez-actions.js";
 import {
   fetchAccessToken,
   fetchRefreshToken,
@@ -20,23 +19,10 @@ if (!LAST_CRON_FILE_PATH) {
 export async function syncIncremental() {
   try {
     const lastCronTime = await getLastCronTime(LAST_CRON_FILE_PATH);
-    const cronStartTime = new Date();
-    const cronStartTimeString = cronStartTime.toISOString();
-    const changesSinceLastCron = await queryLeaves(
-      [
-        "uuid",
-        "userUuid",
-        "updateDate",
-        "status",
-        "startDay",
-        "startDayTime",
-        "endDay",
-        "endDayTime",
-      ],
-      lastCronTime
-        ? [`updateDate>${computeDateStringForAlibeez(lastCronTime)}`]
-        : [`updateDate>${computeDateStringForAlibeez(cronStartTimeString)}`]
-    );
+    const cronStartTimeString = new Date().toISOString();
+    const changesSinceLastCron = await queryLeaves([
+      computeDateStringForAlibeez(lastCronTime || cronStartTimeString),
+    ]);
     for (const leave of changesSinceLastCron.result) {
       try {
         const accessToken = await fetchOrRenewAccessToken(leave.userUuid);

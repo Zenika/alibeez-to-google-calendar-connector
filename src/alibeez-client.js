@@ -1,4 +1,4 @@
-import querystring from "querystring";
+import * as querystring from "querystring";
 import { request, parseBodyAsJson } from "./http-client.js";
 
 const { ALIBEEZ_API_ROOT_URL, ALIBEEZ_KEY } = process.env;
@@ -34,22 +34,6 @@ export async function queryLeaves(fields, filters) {
   return responseBody;
 }
 
-export async function getUserIncomingVacations(userAlibeezId) {
-  const fields = [
-    "uuid",
-    "userUuid",
-    "updateDate",
-    "status",
-    "startDay",
-    "startDayTime",
-    "endDay",
-    "endDayTime",
-  ];
-  const today = new Date().toISOString().split("T")[0];
-  const filters = [`endDate>=${today}MORNING`, `userUuid==${userAlibeezId}`];
-  return await queryLeaves(fields, filters);
-}
-
 export async function queryUsers(fields, filters) {
   const query = querystring.stringify({
     key: ALIBEEZ_KEY,
@@ -66,8 +50,4 @@ export async function queryUsers(fields, filters) {
   }
   const responseBody = await parseBodyAsJson(response);
   return responseBody;
-}
-
-export async function getUserByUsername(username) {
-  return queryUsers(["uuid", "username"], [`username==${username}`]);
 }

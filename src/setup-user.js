@@ -1,6 +1,6 @@
 import { parseJwtClaims } from "./utils/jwt.js";
 import { exchangeCodeForTokens, claimsMatch } from "./google-oauth-client.js";
-import { getUserByUsername } from "./alibeez-client.js";
+import { queryUsers } from "./alibeez-client.js";
 import {
   saveUserInfo,
   saveRefreshToken,
@@ -13,7 +13,10 @@ export async function setupUser(code) {
   if (!claimsMatch(claims)) {
     return null;
   }
-  const request = await getUserByUsername(claims.email);
+  const request = await queryUsers(
+    ["uuid", "username"],
+    [`username==${claims.email}`]
+  );
   const alibeezId = request.result[0].uuid;
   await saveUserInfo(alibeezId, {
     email: claims.email,
