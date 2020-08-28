@@ -2,8 +2,8 @@ import * as http from "http";
 import { generateAuthUrl } from "./google-oauth-client.js";
 import { generateRandomState } from "./utils/state.js";
 import { parseQuery } from "./utils/http.js";
-import { synchronize } from "./synchronize.js";
-import { sync } from "./init-sync.js";
+import { syncIncremental } from "./sync-incremental.js";
+import { syncInit } from "./sync-init.js";
 import { setupUser } from "./setup-user.js";
 
 export function createServer() {
@@ -54,7 +54,7 @@ async function oauthCallbackHandler(req, res, inFlightStates) {
       res.writeHead(401);
       res.end();
     }
-    await sync(user.alibeezId, user.accessToken);
+    await syncInit(user.alibeezId, user.accessToken);
     res.writeHead(201);
     res.end();
   } catch (err) {
@@ -65,7 +65,7 @@ async function oauthCallbackHandler(req, res, inFlightStates) {
 
 async function syncIncrementalHandler(req, res) {
   try {
-    await synchronize();
+    await syncIncremental();
     res.writeHead(200).end();
   } catch (err) {
     res.writeHead(500);
