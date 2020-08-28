@@ -16,10 +16,11 @@ if (!ALIBEEZ_KEY) {
 }
 
 export async function queryLeaves(fields, filters) {
-  const query =
-    `key=${ALIBEEZ_KEY}`
-    + `&fields=${fields.join(',')}`
-    + filters.map(filter => `&filter=${encodeURIComponent(filter)}`).join('');
+  const query = querystring.stringify({
+    key: ALIBEEZ_KEY,
+    fields: fields.join(","),
+    filter: filters,
+  });
 
   const requestUrl = `${ALIBEEZ_API_ROOT_URL}/query/leaves/requests?${query}`;
   const requestOptions = {
@@ -43,8 +44,8 @@ export async function getUserIncomingVacations(userAlibeezId) {
     "startDayTime",
     "endDay",
     "endDayTime",
-  ]
-  const today = new Date().toISOString().split('T')[0];
+  ];
+  const today = new Date().toISOString().split("T")[0];
   const filters = [`endDate>=${today}MORNING`, `userUuid==${userAlibeezId}`];
   return await queryLeaves(fields, filters);
 }
@@ -68,8 +69,5 @@ export async function queryUsers(fields, filters) {
 }
 
 export async function getUserByUsername(username) {
-  return  queryUsers(
-    ["uuid", "username"],
-    [`username==${username}`]
-  );
+  return queryUsers(["uuid", "username"], [`username==${username}`]);
 }
