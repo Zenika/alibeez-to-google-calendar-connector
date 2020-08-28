@@ -53,7 +53,6 @@ const computeDateStringForAlibeez = (dateString) =>
 export const synchronize = async () => {
   try {
     const lastCronTime = await getLastCronTime(LAST_CRON_FILE_PATH);
-    console.log("lastCronTime", new Date().toISOString());
     const cronStartTime = new Date();
     const cronStartTimeString = cronStartTime.toISOString();
     const changesSinceLastCron = await queryLeaves(
@@ -68,8 +67,8 @@ export const synchronize = async () => {
         "endDayTime",
       ],
       lastCronTime
-        ? `updateDate>${computeDateStringForAlibeez(lastCronTime)}`
-        : `updateDate>${computeDateStringForAlibeez(cronStartTimeString)}`
+        ? [`updateDate>${computeDateStringForAlibeez(lastCronTime)}`]
+        : [`updateDate>${computeDateStringForAlibeez(cronStartTimeString)}`]
     );
     changesSinceLastCron.result.forEach(async (leave) => {
       try {
@@ -96,12 +95,14 @@ export const synchronize = async () => {
           leave.status === "CANCELED" ||
           leave.status === "REJECTED"
         ) {
+          console.log("removing leave from", leave.startDay, "to", leave.endDay)
           await removeIfExists(
             "primary",
             `alibeev${leave.uuid}`,
             user.accessToken
           );
         } else if (leave.status === "APPROVED" || leave.status === "PENDING") {
+          console.log("upserting leave from", leave.startDay, "to", leave.endDay)
           await upsert(
             "primary",
             `alibeev${leave.uuid}`,
@@ -126,7 +127,7 @@ export const synchronize = async () => {
         console.error("body", body)
       }
     });
-    //await fs.promises.writeFile(LAST_CRON_FILE_PATH, cronStartTimeString);
+    await fs.promises.writeFile(LAST_CRON_FILE_PATH, cronStartTimeString);
   } catch (err) {
     console.error("top level catch", err);
   }

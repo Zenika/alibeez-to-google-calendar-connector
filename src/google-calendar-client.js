@@ -11,7 +11,7 @@ export async function insert(calendarId, eventBody, accessToken) {
   };
   const requestBody = JSON.stringify(eventBody);
   const response = await request(requestUrl, requestOptions, requestBody);
-  if (response.status !== 200) {
+  if (response.statusCode !== 200) {
     throw response;
   }
   const responseBody = await parseBodyAsJson(response);
@@ -29,7 +29,7 @@ export async function update(calendarId, eventId, eventBody, accessToken) {
   };
   const requestBody = JSON.stringify(eventBody);
   const response = await request(requestUrl, requestOptions, requestBody);
-  if (response.status !== 200) {
+  if (response.statusCode !== 200) {
     throw response;
   }
   const responseBody = await parseBodyAsJson(response);
@@ -45,7 +45,7 @@ export async function remove(calendarId, eventId, accessToken) {
     },
   };
   const response = await request(requestUrl, requestOptions);
-  if (response.status !== 200) {
+  if (response.statusCode !== 200) {
     throw response;
   }
   const responseBody = await parseBodyAsJson(response);
