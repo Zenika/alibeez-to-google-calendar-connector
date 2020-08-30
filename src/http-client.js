@@ -17,9 +17,7 @@ export function request({ url, body, ...options }) {
       }
     : options;
   return new Promise((resolve, reject) => {
-    const req = https.request(url, effectiveOptions, (res) => {
-      resolve(res);
-    });
+    const req = https.request(url, effectiveOptions, resolve);
     req.on("error", reject);
     if (body) {
       req.write(body);
