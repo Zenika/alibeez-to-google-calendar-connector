@@ -5,7 +5,7 @@ import {
   saveUserInfo,
   saveRefreshToken,
   saveAccessToken,
-} from "./users/user-service.js";
+} from "./persistence.js";
 
 export async function setupUser(code) {
   const tokens = await exchangeCodeForTokens(code);

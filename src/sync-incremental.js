@@ -6,7 +6,7 @@ import {
   fetchAccessToken,
   fetchRefreshToken,
   saveAccessToken,
-} from "./users/user-service.js";
+} from "./persistence.js";
 import { pushToGoogleCalendar } from "./push.js";
 
 const { LAST_CRON_FILE_PATH } = process.env;
