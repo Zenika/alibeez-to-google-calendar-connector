@@ -21,12 +21,10 @@ export async function queryLeaves(fields, filters) {
     fields: fields.join(","),
     filter: filters,
   });
-
-  const requestUrl = `${ALIBEEZ_API_ROOT_URL}/query/leaves/requests?${query}`;
-  const requestOptions = {
+  const response = await request({
+    url: `${ALIBEEZ_API_ROOT_URL}/query/leaves/requests?${query}`,
     method: "GET",
-  };
-  const response = await request(requestUrl, requestOptions);
+  });
   if (response.statusCode !== 200) {
     throw response;
   }
@@ -40,11 +38,10 @@ export async function queryUsers(fields, filters) {
     fields: fields.join(","),
     filter: filters,
   });
-  const requestUrl = `${ALIBEEZ_API_ROOT_URL}/query/users?${query}`;
-  const requestOptions = {
+  const response = await request({
+    url: `${ALIBEEZ_API_ROOT_URL}/query/users?${query}`,
     method: "GET",
-  };
-  const response = await request(requestUrl, requestOptions);
+  });
   if (response.statusCode !== 200) {
     throw response;
   }

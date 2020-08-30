@@ -5,7 +5,7 @@ const {
   GOOGLE_OAUTH2_CLIENT_ID,
   GOOGLE_OAUTH2_CLIENT_SECRET,
   GOOGLE_OAUTH2_CLIENT_REDIRECT_URI,
-  GOOGLE_OAUTH2_CLIENT_HD
+  GOOGLE_OAUTH2_CLIENT_HD,
 } = process.env;
 
 if (!GOOGLE_OAUTH2_CLIENT_ID) {
@@ -59,21 +59,20 @@ export function claimsMatch(claims) {
 }
 
 export async function exchangeCodeForTokens(code) {
-  const requestUrl = `https://oauth2.googleapis.com/token`;
-  const requestOptions = {
+  const response = await request({
+    url: `https://oauth2.googleapis.com/token`,
     method: "POST",
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
     },
-  };
-  const requestBody = querystring.stringify({
-    client_id: GOOGLE_OAUTH2_CLIENT_ID,
-    client_secret: GOOGLE_OAUTH2_CLIENT_SECRET,
-    redirect_uri: GOOGLE_OAUTH2_CLIENT_REDIRECT_URI,
-    grant_type: "authorization_code",
-    code,
+    body: querystring.stringify({
+      client_id: GOOGLE_OAUTH2_CLIENT_ID,
+      client_secret: GOOGLE_OAUTH2_CLIENT_SECRET,
+      redirect_uri: GOOGLE_OAUTH2_CLIENT_REDIRECT_URI,
+      grant_type: "authorization_code",
+      code,
+    }),
   });
-  const response = await request(requestUrl, requestOptions, requestBody);
   if (response.statusCode !== 200) {
     throw response;
   }
@@ -82,20 +81,19 @@ export async function exchangeCodeForTokens(code) {
 }
 
 export async function exchangeRefreshTokenForAccessToken(refreshToken) {
-  const requestUrl = `https://oauth2.googleapis.com/token`;
-  const requestOptions = {
+  const response = await request({
+    url: `https://oauth2.googleapis.com/token`,
     method: "POST",
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
     },
-  };
-  const requestBody = querystring.stringify({
-    client_id: GOOGLE_OAUTH2_CLIENT_ID,
-    client_secret: GOOGLE_OAUTH2_CLIENT_SECRET,
-    grant_type: "refresh_token",
-    refresh_token: refreshToken,
+    body: querystring.stringify({
+      client_id: GOOGLE_OAUTH2_CLIENT_ID,
+      client_secret: GOOGLE_OAUTH2_CLIENT_SECRET,
+      grant_type: "refresh_token",
+      refresh_token: refreshToken,
+    }),
   });
-  const response = await request(requestUrl, requestOptions, requestBody);
   if (response.statusCode !== 200) {
     throw response;
   }

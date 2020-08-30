@@ -1,6 +1,12 @@
+import * as http from "http";
 import * as https from "https";
 
-export function request(url, options, body) {
+/**
+ *
+ * @param {{ url: string | URL, body?: string } & https.RequestOptions} options
+ * @returns {Promise<http.IncomingMessage>}
+ */
+export function request({ url, body, ...options }) {
   const effectiveOptions = body
     ? {
         ...options,
