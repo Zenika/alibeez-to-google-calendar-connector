@@ -2,6 +2,9 @@
   "name": "alibeez-to-calendar-sync",
   "version": "0.0.0",
   "type": "module",
+  "engines": {
+    "node": ">=14"
+  },
   "scripts": {
     "start": "node --require dotenv/config src/index.js"
   },

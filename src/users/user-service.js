@@ -12,10 +12,7 @@ export async function saveUserInfo(id, info) {
 
 export async function fetchRefreshToken(id) {
   const content = await tryReadUserFile(id, REFRESH_TOKEN_FILE_NAME);
-  if (!content) {
-    return null;
-  }
-  return content.token;
+  return content?.token;
 }
 
 export async function saveRefreshToken(id, token) {
@@ -24,10 +21,7 @@ export async function saveRefreshToken(id, token) {
 
 export async function fetchAccessToken(id) {
   const content = await tryReadUserFile(id, ACCESS_TOKEN_FILE_NAME);
-  if (!content) {
-    return null;
-  }
-  return content.accessTokenInfo;
+  return content?.accessTokenInfo;
 }
 
 export async function saveAccessToken(id, accessTokenInfo) {
