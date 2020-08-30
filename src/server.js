@@ -51,8 +51,8 @@ async function oauthCallbackHandler(req, res, inFlightStates) {
     inFlightStates.delete(Number(state));
     const user = await setupUser(code);
     if (!user) {
-      res.writeHead(401);
-      res.end();
+      res.writeHead(401).end();
+      return;
     }
     await syncInit(user.alibeezId, user.accessToken);
     res.writeHead(201);
