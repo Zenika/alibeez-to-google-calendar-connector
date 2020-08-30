@@ -21,12 +21,16 @@ export function createServer() {
     ) {
       await syncIncrementalHandler(req, res);
     } else {
-      res.writeHead(404);
-      res.end();
+      res.writeHead(404).end();
     }
   });
 }
 
+/**
+ *
+ * @param {http.IncomingMessage} req
+ * @param {http.ServerResponse} res
+ */
 async function oauthAuthorizeHandler(req, res, inFlightStates) {
   const scopes = [
     "openid",
@@ -34,18 +38,21 @@ async function oauthAuthorizeHandler(req, res, inFlightStates) {
     "https://www.googleapis.com/auth/calendar.events",
   ];
   const state = generateRandomState();
-  const oauthUrl = generateAuthUrl(scopes, state);
-  res.writeHead(302, { Location: oauthUrl });
-  res.end();
   inFlightStates.add(state);
+  const oauthUrl = generateAuthUrl(scopes, state);
+  res.writeHead(302, { Location: oauthUrl }).end();
 }
 
+/**
+ *
+ * @param {http.IncomingMessage} req
+ * @param {http.ServerResponse} res
+ */
 async function oauthCallbackHandler(req, res, inFlightStates) {
   try {
     const { code, state } = parseQuery(req.url);
     if (!inFlightStates.has(Number(state))) {
-      res.writeHead(401);
-      res.end();
+      res.writeHead(401).end();
       return;
     }
     inFlightStates.delete(Number(state));
@@ -55,20 +62,22 @@ async function oauthCallbackHandler(req, res, inFlightStates) {
       return;
     }
     await syncInit(user.alibeezId, user.accessToken);
-    res.writeHead(201);
-    res.end();
+    res.writeHead(201).end();
   } catch (err) {
-    res.writeHead(500);
-    res.end();
+    res.writeHead(500).end();
   }
 }
 
+/**
+ *
+ * @param {http.IncomingMessage} req
+ * @param {http.ServerResponse} res
+ */
 async function syncIncrementalHandler(req, res) {
   try {
     await syncIncremental();
     res.writeHead(200).end();
   } catch (err) {
-    res.writeHead(500);
-    res.end();
+    res.writeHead(500).end();
   }
 }
