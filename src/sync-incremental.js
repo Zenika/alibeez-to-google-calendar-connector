@@ -17,6 +17,7 @@ if (!LAST_CRON_FILE_PATH) {
 }
 
 export async function syncIncremental() {
+  console.log("Starting incremental synchronization");
   const cronStartTimeString = new Date().toISOString();
   let lastCronTime;
   try {
@@ -68,7 +69,7 @@ export async function syncIncremental() {
       `ERROR: Cannot update last cron time, next update will be partially redundant`
     );
   }
-  console.log("synchronize finished");
+  console.log("Finishing incremental synchronization");
 }
 
 async function fetchOrRenewAccessToken(userId) {
