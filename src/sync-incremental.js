@@ -83,7 +83,7 @@ async function fetchOrRenewAccessToken(userId) {
   }
   const currentTime = new Date().getTime();
   const expiresAt = new Date(accessTokenInfo.expiresAt).getTime();
-  const timeRemaining = currentTime - expiresAt;
+  const timeRemaining = expiresAt - currentTime;
   if (timeRemaining >= 60 * 1000 /* 1 minute */) {
     return accessTokenInfo.token;
   }
