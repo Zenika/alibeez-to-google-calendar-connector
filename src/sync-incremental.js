@@ -9,36 +9,40 @@ import {
 } from "./persistence.js";
 import { pushToGoogleCalendar } from "./push.js";
 
-const { LAST_CRON_FILE_PATH } = process.env;
-if (!LAST_CRON_FILE_PATH) {
+const { LAST_CRON_FILE_PATH: LATEST_UPDATE_DATE_FILE_PATH } = process.env;
+if (!LATEST_UPDATE_DATE_FILE_PATH) {
   throw new Error(
-    `environment variable LAST_CRON_FILE_PATH: expected non-empty string but found '${LAST_CRON_FILE_PATH}'`
+    `environment variable LAST_CRON_FILE_PATH: expected non-empty string but found '${LATEST_UPDATE_DATE_FILE_PATH}'`
   );
 }
 
 export async function syncIncremental() {
   console.log("Starting incremental synchronization");
-  const cronStartTimeString = new Date().toISOString();
-  let lastCronTime;
+  const now = new Date().toISOString();
+  let latestUpdateDate;
   try {
-    lastCronTime = await getLastCronTime(LAST_CRON_FILE_PATH);
+    latestUpdateDate = (
+      await fs.promises.readFile(LATEST_UPDATE_DATE_FILE_PATH)
+    )
+      .toString()
+      .trim();
   } catch (err) {
     console.warn(
       `WARN: Cannot read last cron time, defaulting to current time`,
       err
     );
-    lastCronTime = cronStartTimeString;
+    latestUpdateDate = now;
   }
-  let changesSinceLastCron;
+  let updatedLeaves;
   try {
-    changesSinceLastCron = await queryLeaves([
-      `updateDate>=${computeDateStringForAlibeez(lastCronTime)}`,
+    updatedLeaves = await queryLeaves([
+      `updateDate>=${latestUpdateDate.slice(0, -1)}`,
     ]);
   } catch (err) {
     console.error(`ERROR: Cannot query leaves from Alibeez, aborting`, err);
     return;
   }
-  for (const leave of changesSinceLastCron.result) {
+  for (const leave of updatedLeaves.result) {
     let accessToken;
     try {
       accessToken = await fetchOrRenewAccessToken(leave.userUuid);
@@ -63,7 +67,7 @@ export async function syncIncremental() {
     }
   }
   try {
-    await fs.promises.writeFile(LAST_CRON_FILE_PATH, cronStartTimeString);
+    await fs.promises.writeFile(LATEST_UPDATE_DATE_FILE_PATH, now);
   } catch (err) {
     console.error(
       `ERROR: Cannot update last cron time, next update will be partially redundant`
@@ -93,17 +97,3 @@ async function fetchOrRenewAccessToken(userId) {
   });
   return access_token;
 }
-
-const getLastCronTime = async (filePath) => {
-  if (!filePath) {
-    throw new Error("No path provided for last cron time save file");
-  }
-  try {
-    return (await fs.promises.readFile(filePath)).toString().trim();
-  } catch (err) {
-    return; // in case no file was found return undefined ?
-  }
-};
-
-const computeDateStringForAlibeez = (dateString) =>
-  dateString.slice(0, dateString.length - 2);
