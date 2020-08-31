@@ -10,10 +10,10 @@ import {
 } from "./persistence.js";
 import { pushToGoogleCalendar } from "./push.js";
 
-const { LAST_CRON_FILE_PATH: LATEST_UPDATE_DATE_FILE_PATH } = process.env;
+const { LATEST_UPDATE_DATE_FILE_PATH } = process.env;
 if (!LATEST_UPDATE_DATE_FILE_PATH) {
   throw new Error(
-    `environment variable LAST_CRON_FILE_PATH: expected non-empty string but found '${LATEST_UPDATE_DATE_FILE_PATH}'`
+    `environment variable LATEST_UPDATE_DATE_FILE_PATH: expected non-empty string but found '${LATEST_UPDATE_DATE_FILE_PATH}'`
   );
 }
 
@@ -29,7 +29,7 @@ export async function syncIncremental() {
       .trim();
   } catch (err) {
     console.warn(
-      `WARN: Cannot read last cron time, defaulting to current time`,
+      `WARN: Cannot read latest update date, defaulting to current time`,
       err
     );
     latestUpdateDate = now;
@@ -80,7 +80,7 @@ export async function syncIncremental() {
     await fs.promises.writeFile(LATEST_UPDATE_DATE_FILE_PATH, now);
   } catch (err) {
     console.error(
-      `ERROR: Cannot update last cron time, next update will be partially redundant`
+      `ERROR: Cannot update latest update date, next update will be partially redundant`
     );
   }
   console.log("Finishing incremental synchronization");
