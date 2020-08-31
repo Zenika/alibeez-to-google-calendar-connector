@@ -17,44 +17,56 @@ if (!LAST_CRON_FILE_PATH) {
 }
 
 export async function syncIncremental() {
+  const cronStartTimeString = new Date().toISOString();
+  let lastCronTime;
   try {
-    const lastCronTime = await getLastCronTime(LAST_CRON_FILE_PATH);
-    const cronStartTimeString = new Date().toISOString();
-    const changesSinceLastCron = await queryLeaves([
-      `updateDate>=${computeDateStringForAlibeez(
-        lastCronTime || cronStartTimeString
-      )}`,
+    lastCronTime = await getLastCronTime(LAST_CRON_FILE_PATH);
+  } catch (err) {
+    console.warn(
+      `WARN: Cannot read last cron time, defaulting to current time`,
+      err
+    );
+    lastCronTime = cronStartTimeString;
+  }
+  let changesSinceLastCron;
+  try {
+    changesSinceLastCron = await queryLeaves([
+      `updateDate>=${computeDateStringForAlibeez(lastCronTime)}`,
     ]);
-    for (const leave of changesSinceLastCron.result) {
-      try {
-        const accessToken = await fetchOrRenewAccessToken(leave.userUuid);
-        if (!accessToken) {
-          continue;
-        }
-        await pushToGoogleCalendar(leave, accessToken);
-      } catch (err) {
-        console.error(
-          "Error while synchronizing: ",
-          err instanceof http.IncomingMessage ? err.statusCode : err
-        );
-        let body;
-        for await (const chunk of err) {
-          body += chunk.toString();
-        }
-        console.error("body", body);
-      }
+  } catch (err) {
+    console.error(`ERROR: Cannot query leaves from Alibeez, aborting`, err);
+    return;
+  }
+  for (const leave of changesSinceLastCron.result) {
+    let accessToken;
+    try {
+      accessToken = await fetchOrRenewAccessToken(leave.userUuid);
+    } catch (err) {
+      console.error(
+        `ERROR: Cannot fetch or renew access token for user '${leave.userUuid}', skipping`,
+        err
+      );
+      continue;
     }
+    if (!accessToken) {
+      continue;
+    }
+    try {
+      await pushToGoogleCalendar(leave, accessToken);
+    } catch (err) {
+      console.error(
+        `ERROR: Cannot push leave '${leave.uuid}' of user '${leave.userUuid}' to Google Calendar, skipping`,
+        err
+      );
+      continue;
+    }
+  }
+  try {
     await fs.promises.writeFile(LAST_CRON_FILE_PATH, cronStartTimeString);
   } catch (err) {
     console.error(
-      "Error while synchronizing: ",
-      err instanceof http.IncomingMessage ? err.statusCode : err
+      `ERROR: Cannot update last cron time, next update will be partially redundant`
     );
-    let body;
-    for await (const chunk of err) {
-      body += chunk.toString();
-    }
-    console.error("body", body);
   }
   console.log("synchronize finished");
 }
