@@ -31,15 +31,23 @@ export function request({ url, body, ...nativeOptions }) {
  * @param {http.IncomingMessage} response
  */
 export async function parseBodyAsJson(response) {
-  const contentType = response.headers["content-type"];
-  if (!contentType.includes("json")) {
+  if (!hasJsonBody(response)) {
     console.warn(
-      `WARN: Parsing body as JSON but Content-Type is '${contentType}'`
+      `WARN: Parsing body as JSON but Content-Type is '${response.headers["content-type"]}'`
     );
   }
+  const text = await parseBodyAsText(response);
+  return JSON.parse(text);
+}
+
+export function hasJsonBody(response) {
+  return (response.headers["content-type"] || "").includes("json");
+}
+
+export async function parseBodyAsText(response) {
   let body = "";
   for await (const chunk of response) {
     body += chunk.toString();
   }
-  return JSON.parse(body);
+  return body;
 }
