@@ -6,10 +6,14 @@ export async function pushToGoogleCalendar(leave, accessToken) {
     leave.status === "CANCELED" ||
     leave.status === "REJECTED"
   ) {
-    console.log("removing leave from", leave.startDay, "to", leave.endDay);
+    console.log(
+      `Removing leave '${leave.uuid}' of user '${leave.userUuid}' from ${leave.startDay} to ${leave.endDay}`
+    );
     await removeIfExists("primary", mapId(leave), accessToken);
   } else if (leave.status === "APPROVED" || leave.status === "PENDING") {
-    console.log("upserting leave from", leave.startDay, "to", leave.endDay);
+    console.log(
+      `Upserting leave '${leave.uuid}' of user '${leave.userUuid}' from ${leave.startDay} to ${leave.endDay}`
+    );
     await upsert("primary", mapId(leave), mapEventBody(leave), accessToken);
   } else {
     console.error("ERROR: couldn't update leave, status uknown", leave.status);
