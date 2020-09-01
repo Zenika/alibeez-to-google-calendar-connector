@@ -22,9 +22,7 @@ export async function syncIncremental() {
   const now = new Date().toISOString();
   let latestSyncDate;
   try {
-    latestSyncDate = (
-      await fs.promises.readFile(LATEST_SYNC_DATE_FILE_PATH)
-    )
+    latestSyncDate = (await fs.promises.readFile(LATEST_SYNC_DATE_FILE_PATH))
       .toString()
       .trim();
   } catch (err) {
