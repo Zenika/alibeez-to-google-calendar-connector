@@ -26,7 +26,17 @@ export function request({ url, body, ...nativeOptions }) {
   });
 }
 
+/**
+ *
+ * @param {http.IncomingMessage} response
+ */
 export async function parseBodyAsJson(response) {
+  const contentType = response.headers["content-type"];
+  if (!contentType.includes("json")) {
+    console.warn(
+      `WARN: Parsing body as JSON but Content-Type is '${contentType}'`
+    );
+  }
   let body = "";
   for await (const chunk of response) {
     body += chunk.toString();
