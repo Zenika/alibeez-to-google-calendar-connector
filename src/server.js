@@ -63,12 +63,16 @@ async function oauthAuthorizeHandler(req, res, inFlightStates) {
  */
 async function oauthCallbackHandler(req, res, inFlightStates) {
   try {
-    const { code, state } = parseQuery(req.url);
+    const { code, state, error } = parseQuery(req.url);
     if (!inFlightStates.has(Number(state))) {
       res.writeHead(401).end();
       return;
     }
     inFlightStates.delete(Number(state));
+    if (error) {
+      res.writeHead(401).end();
+      return;
+    }
     const user = await setupUser(code);
     if (!user) {
       res.writeHead(401).end();
