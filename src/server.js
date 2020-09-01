@@ -40,15 +40,20 @@ export function createServer() {
  * @param {http.ServerResponse} res
  */
 async function oauthAuthorizeHandler(req, res, inFlightStates) {
-  const scopes = [
-    "openid",
-    "email",
-    "https://www.googleapis.com/auth/calendar.events",
-  ];
-  const state = generateRandomState();
-  inFlightStates.add(state);
-  const oauthUrl = generateAuthUrl(scopes, state);
-  res.writeHead(302, { Location: oauthUrl }).end();
+  try {
+    const scopes = [
+      "openid",
+      "email",
+      "https://www.googleapis.com/auth/calendar.events",
+    ];
+    const state = generateRandomState();
+    inFlightStates.add(state);
+    const oauthUrl = generateAuthUrl(scopes, state);
+    res.writeHead(302, { Location: oauthUrl }).end();
+  } catch (err) {
+    console.error(`ERROR: Cannot handle OAuth authorization`, err);
+    res.writeHead(500).end();
+  }
 }
 
 /**
@@ -72,6 +77,7 @@ async function oauthCallbackHandler(req, res, inFlightStates) {
     await syncInit(user.alibeezId, user.accessToken);
     res.writeHead(201).end();
   } catch (err) {
+    console.error(`ERROR: Cannot handle OAuth callback`, err);
     res.writeHead(500).end();
   }
 }
@@ -89,6 +95,7 @@ async function syncIncrementalHandler(req, res) {
     await syncIncremental();
     res.writeHead(200).end();
   } catch (err) {
+    console.error(`ERROR: Cannot handle incremental sync`, err);
     res.writeHead(500).end();
   }
 }
