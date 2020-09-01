@@ -1,7 +1,9 @@
 import * as fs from "fs";
 import * as path from "path";
 
-const { USER_DIR = "data/users" } = process.env;
+const USER_DIR = path.resolve(process.env.USER_DIR || "data/users");
+console.log(`Using user directory path:`, USER_DIR);
+
 const INFO_FILE_NAME = "info.json";
 const REFRESH_TOKEN_FILE_NAME = "refresh_token.json";
 const ACCESS_TOKEN_FILE_NAME = "access_token.json";
