@@ -32,6 +32,7 @@ export async function syncIncremental() {
     );
     latestSyncDate = now;
   }
+  console.log(`Ready to pull leaves updated since '${latestSyncDate}'`);
   let updatedLeaves;
   try {
     updatedLeaves = await queryLeaves([
@@ -44,6 +45,7 @@ export async function syncIncremental() {
     console.error(`ERROR: Cannot query leaves from Alibeez, aborting`, err);
     return;
   }
+  console.log(`Pulled '${updatedLeaves.result.length}' leaves from Alibeez`);
   for (const leave of updatedLeaves.result) {
     let accessToken;
     try {
