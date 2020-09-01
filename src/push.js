@@ -31,14 +31,12 @@ function mapEventBody(item) {
         item.startDay,
         item.startDayTime
       ).toISOString(),
-      timeZone: "Europe/Paris",
     },
     end: {
       dateTime: alibeezTimeToRealTime(
         item.endDay,
         item.endDayTime
       ).toISOString(),
-      timeZone: "Europe/Paris",
     },
     summary: "Congés (test, ignorer)",
   };
