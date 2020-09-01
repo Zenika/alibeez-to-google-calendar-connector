@@ -8,6 +8,12 @@ import { setupUser } from "./setup-user.js";
 
 const { ADMIN_SECRET, UNSECURE } = process.env;
 
+if (UNSECURE === "true") {
+  console.warn(
+    `WARN: UNSECURE is set to 'true'! Admin endpoints have no security. This is only OK if the server is not reachable from the internet.`
+  );
+}
+
 if (!ADMIN_SECRET && UNSECURE !== "true") {
   throw new Error(
     `environment variable ADMIN_SECRET: expected non-empty string but found '${ADMIN_SECRET}' (you may disable this error by setting UNSECURE to 'true')`
