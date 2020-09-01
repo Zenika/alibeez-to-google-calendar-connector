@@ -1,6 +1,6 @@
 #!/bin/bash -l
 
 curl \
-  --method GET \
+  --request GET \
   --header "Authorization: Bearer ${ADMIN_SECRET}" \
   http://localhost:${PORT}/sync/incremental
