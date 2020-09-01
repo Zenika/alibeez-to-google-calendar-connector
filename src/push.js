@@ -38,7 +38,8 @@ function mapEventBody(item) {
         item.endDayTime
       ).toISOString(),
     },
-    summary: "Congés (test, ignorer)",
+    summary: "Absence",
+    description: `Imported from Alibeez on ${new Date().toISOString()}`,
   };
 }
 
