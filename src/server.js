@@ -5,6 +5,7 @@ import { parseQuery } from "./utils/http.js";
 import { syncIncremental } from "./sync-incremental.js";
 import { syncInit } from "./sync-init.js";
 import { setupUser } from "./setup-user.js";
+import { parseBodyAsJson } from "./http-client.js";
 
 const { ADMIN_SECRET, UNSECURE } = process.env;
 
@@ -67,6 +68,7 @@ async function oauthAuthorizeHandler(req, res, inFlightStates) {
     const scopes = [
       "openid",
       "email",
+      "https://www.googleapis.com/auth/calendar.readonly",
       "https://www.googleapis.com/auth/calendar.events",
     ];
     const state = generateRandomState();
@@ -109,6 +111,9 @@ async function oauthCallbackHandler(req, res, inFlightStates) {
     );
     res.end();
   } catch (err) {
+    if (err instanceof http.IncomingMessage) {
+      err = await parseBodyAsJson(err);
+    }
     console.error(`ERROR: Cannot handle OAuth callback`, err);
     res.writeHead(500).end();
   }

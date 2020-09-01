@@ -1,6 +1,8 @@
 import { removeIfExists, upsert } from "./google-calendar-actions.js";
+import { fetchUserInfo } from "./persistence.js";
 
 export async function pushToGoogleCalendar(leave, accessToken) {
+  const { timeZone } = await fetchUserInfo(leave.userUuid);
   if (
     leave.status === "CANCEL_PENDING" ||
     leave.status === "CANCELED" ||
@@ -14,7 +16,12 @@ export async function pushToGoogleCalendar(leave, accessToken) {
     console.log(
       `Upserting leave '${leave.uuid}' of user '${leave.userUuid}' from ${leave.startDay} to ${leave.endDay}`
     );
-    await upsert("primary", mapId(leave), mapEventBody(leave), accessToken);
+    await upsert(
+      "primary",
+      mapId(leave),
+      mapEventBody(leave, timeZone),
+      accessToken
+    );
   } else {
     console.error("ERROR: couldn't update leave, status uknown", leave.status);
   }
@@ -24,19 +31,26 @@ function mapId(leave) {
   return `alibeev${leave.uuid}`;
 }
 
-function mapEventBody(item) {
+/**
+ *
+ * @param {*} leave
+ * @param {string} timeZone
+ */
+function mapEventBody(leave, timeZone) {
   return {
     start: {
       dateTime: alibeezTimeToRealTime(
-        item.startDay,
-        item.startDayTime
+        leave.startDay,
+        leave.startDayTime
       ).toISOString(),
+      timeZone,
     },
     end: {
       dateTime: alibeezTimeToRealTime(
-        item.endDay,
-        item.endDayTime
+        leave.endDay,
+        leave.endDayTime
       ).toISOString(),
+      timeZone,
     },
     summary: "Absence",
     description: `Imported from Alibeez on ${new Date().toISOString()}`,

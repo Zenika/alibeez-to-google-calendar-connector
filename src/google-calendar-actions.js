@@ -1,12 +1,21 @@
 import * as http from "http";
-import { insert, update, remove } from "./google-calendar-client.js";
+import {
+  insertEvent,
+  updateEvent,
+  removeEvent,
+  getCalendar,
+} from "./google-calendar-client.js";
+
+export async function getPrimaryCalendar(accessToken) {
+  return await getCalendar("primary", accessToken);
+}
 
 export async function upsert(calendarId, eventId, eventBody, accessToken) {
   try {
-    return await update(calendarId, eventId, eventBody, accessToken);
+    return await updateEvent(calendarId, eventId, eventBody, accessToken);
   } catch (err) {
     if (err instanceof http.IncomingMessage && err.statusCode === 404) {
-      return await insert(
+      return await insertEvent(
         calendarId,
         { id: eventId, ...eventBody },
         accessToken
@@ -19,7 +28,7 @@ export async function upsert(calendarId, eventId, eventBody, accessToken) {
 
 export async function removeIfExists(calendarId, eventId, accessToken) {
   try {
-    return await remove(calendarId, eventId, accessToken);
+    return await removeEvent(calendarId, eventId, accessToken);
   } catch (err) {
     if (err instanceof http.IncomingMessage && err.statusCode === 404) {
       return err;

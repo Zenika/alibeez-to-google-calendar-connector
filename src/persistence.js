@@ -8,6 +8,11 @@ const INFO_FILE_NAME = "info.json";
 const REFRESH_TOKEN_FILE_NAME = "refresh_token.json";
 const ACCESS_TOKEN_FILE_NAME = "access_token.json";
 
+export async function fetchUserInfo(id) {
+  const content = await tryReadUserFile(id, INFO_FILE_NAME);
+  return content?.info;
+}
+
 export async function saveUserInfo(id, info) {
   await writeUserFile(id, INFO_FILE_NAME, { info });
 }

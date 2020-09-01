@@ -6,6 +6,7 @@ import {
   saveRefreshToken,
   saveAccessToken,
 } from "./persistence.js";
+import { getPrimaryCalendar } from "./google-calendar-actions.js";
 
 export async function setupUser(code) {
   const tokens = await exchangeCodeForTokens(code);
@@ -13,15 +14,17 @@ export async function setupUser(code) {
   if (!claimsMatch(claims)) {
     return null;
   }
-  const request = await queryUsers(
+  const { timeZone } = await getPrimaryCalendar(tokens.access_token);
+  const userResponse = await queryUsers(
     ["uuid", "username"],
     [`username==${claims.email}`]
   );
-  const alibeezId = request.result[0].uuid;
+  const alibeezId = userResponse.result[0].uuid;
   await saveUserInfo(alibeezId, {
     email: claims.email,
     alibeezId,
     googleId: claims.sub,
+    timeZone,
   });
   await saveRefreshToken(alibeezId, tokens.refresh_token);
   await saveAccessToken(alibeezId, {
