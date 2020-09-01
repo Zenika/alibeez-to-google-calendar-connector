@@ -105,7 +105,7 @@ async function oauthCallbackHandler(req, res, inFlightStates) {
     res.writeHead(200);
     res.write(
       `<h1>I'm Alibeez-to-Google-Calendar Connector</h1>
-      <p>Success! I've started to copy over your current and future leaves to your calendar. I will update your calendar every hour.</p>`
+      <p>Success! I've started to copy over your current and future leaves to your calendar. I will update your calendar every hour, on the hour.</p>`
     );
     res.end();
   } catch (err) {

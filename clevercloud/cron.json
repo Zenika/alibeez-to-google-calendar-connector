@@ -1,1 +1,1 @@
-["* */1 * * MON-FRI $ROOT/clevercloud/sync.sh"]
+["0 * * * MON-FRI $ROOT/clevercloud/sync.sh"]
