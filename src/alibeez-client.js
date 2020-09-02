@@ -25,9 +25,6 @@ export async function queryLeaves(fields, filters) {
     url: `${ALIBEEZ_API_ROOT_URL}/query/leaves/requests?${query}`,
     method: "GET",
   });
-  if (response.statusCode !== 200) {
-    throw response;
-  }
   const responseBody = await parseBodyAsJson(response);
   return responseBody;
 }
@@ -42,9 +39,6 @@ export async function queryUsers(fields, filters) {
     url: `${ALIBEEZ_API_ROOT_URL}/query/users?${query}`,
     method: "GET",
   });
-  if (response.statusCode !== 200) {
-    throw response;
-  }
   const responseBody = await parseBodyAsJson(response);
   return responseBody;
 }

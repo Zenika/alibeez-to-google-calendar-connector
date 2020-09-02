@@ -8,9 +8,6 @@ export async function getCalendar(calendarId, accessToken) {
       Authorization: `Bearer ${accessToken}`,
     },
   });
-  if (response.statusCode !== 200) {
-    throw response;
-  }
   const responseBody = await parseBodyAsJson(response);
   return responseBody;
 }
@@ -25,9 +22,6 @@ export async function insertEvent(calendarId, eventBody, accessToken) {
     },
     body: JSON.stringify(eventBody),
   });
-  if (response.statusCode !== 200) {
-    throw response;
-  }
   const responseBody = await parseBodyAsJson(response);
   return responseBody;
 }
@@ -42,9 +36,6 @@ export async function updateEvent(calendarId, eventId, eventBody, accessToken) {
     },
     body: JSON.stringify(eventBody),
   });
-  if (response.statusCode !== 200) {
-    throw response;
-  }
   const responseBody = await parseBodyAsJson(response);
   return responseBody;
 }
@@ -57,9 +48,6 @@ export async function removeEvent(calendarId, eventId, accessToken) {
       Authorization: `Bearer ${accessToken}`,
     },
   });
-  if (response.statusCode !== 200) {
-    throw response;
-  }
   const responseBody = await parseBodyAsJson(response);
   return responseBody;
 }

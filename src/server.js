@@ -5,7 +5,6 @@ import { parseQuery } from "./utils/http.js";
 import { syncIncremental } from "./sync-incremental.js";
 import { syncInit } from "./sync-init.js";
 import { setupUser } from "./setup-user.js";
-import { parseBodyAsText } from "./http-client.js";
 
 const { ADMIN_SECRET, UNSECURE } = process.env;
 
@@ -111,9 +110,6 @@ async function oauthCallbackHandler(req, res, inFlightStates) {
     );
     res.end();
   } catch (err) {
-    if (err instanceof http.IncomingMessage) {
-      err = await parseBodyAsText(err);
-    }
     console.error(`ERROR: Cannot handle OAuth callback`, err);
     res.writeHead(500).end();
   }

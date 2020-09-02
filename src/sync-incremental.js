@@ -1,6 +1,4 @@
 import * as fs from "fs";
-import * as http from "http";
-import { parseBodyAsText } from "./http-client.js";
 import { exchangeRefreshTokenForAccessToken } from "./google-oauth-client.js";
 import { queryLeaves } from "./alibeez-actions.js";
 import {
@@ -39,9 +37,6 @@ export async function syncIncremental() {
       `updateDate>=${latestSyncDate.slice(0, -1)}`,
     ]);
   } catch (err) {
-    if (err instanceof http.IncomingMessage) {
-      err = await parseBodyAsText(err);
-    }
     console.error(`ERROR: Cannot query leaves from Alibeez, aborting`, err);
     return;
   }
@@ -51,9 +46,6 @@ export async function syncIncremental() {
     try {
       accessToken = await fetchOrRenewAccessToken(leave.userUuid);
     } catch (err) {
-      if (err instanceof http.IncomingMessage) {
-        err = await parseBodyAsText(err);
-      }
       console.error(
         `ERROR: Cannot fetch or renew access token for user '${leave.userUuid}', skipping`,
         err
@@ -66,9 +58,6 @@ export async function syncIncremental() {
     try {
       await pushToGoogleCalendar(leave, accessToken);
     } catch (err) {
-      if (err instanceof http.IncomingMessage) {
-        err = await parseBodyAsText(err);
-      }
       console.error(
         `ERROR: Cannot push leave '${leave.uuid}' of user '${leave.userUuid}' to Google Calendar, skipping`,
         err

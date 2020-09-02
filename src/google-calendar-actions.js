@@ -1,10 +1,10 @@
-import * as http from "http";
 import {
   insertEvent,
   updateEvent,
   removeEvent,
   getCalendar,
 } from "./google-calendar-client.js";
+import { HttpClientError } from "./http-client.js";
 
 export async function getPrimaryCalendar(accessToken) {
   return await getCalendar("primary", accessToken);
@@ -15,9 +15,10 @@ export async function upsert(calendarId, eventId, eventBody, accessToken) {
     return await updateEvent(calendarId, eventId, eventBody, accessToken);
   } catch (err) {
     if (
-      err instanceof http.IncomingMessage &&
-      [404, 410].includes(err.statusCode)
+      err instanceof HttpClientError &&
+      [404, 410].includes(err.response.statusCode)
     ) {
+      console.log(err);
       return await insertEvent(
         calendarId,
         { id: eventId, ...eventBody },
@@ -34,8 +35,8 @@ export async function removeIfExists(calendarId, eventId, accessToken) {
     return await removeEvent(calendarId, eventId, accessToken);
   } catch (err) {
     if (
-      err instanceof http.IncomingMessage &&
-      [404, 410].includes(err.statusCode)
+      err instanceof HttpClientError &&
+      [404, 410].includes(err.response.statusCode)
     ) {
       return err;
     } else {

@@ -73,9 +73,6 @@ export async function exchangeCodeForTokens(code) {
       code,
     }),
   });
-  if (response.statusCode !== 200) {
-    throw response;
-  }
   const responseBody = await parseBodyAsJson(response);
   return responseBody;
 }
@@ -94,9 +91,6 @@ export async function exchangeRefreshTokenForAccessToken(refreshToken) {
       refresh_token: refreshToken,
     }),
   });
-  if (response.statusCode !== 200) {
-    throw response;
-  }
   const responseBody = await parseBodyAsJson(response);
   return responseBody;
 }
