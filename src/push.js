@@ -8,20 +8,14 @@ export async function pushToGoogleCalendar(leave, accessToken) {
     leave.status === "CANCELED" ||
     leave.status === "REJECTED"
   ) {
-    console.log(
-      `Removing leave '${leave.uuid}' of user '${leave.userUuid}' from ${leave.startDay} to ${leave.endDay}`
-    );
-    await removeIfExists("primary", mapId(leave), accessToken);
+    const eventId = mapId(leave);
+    console.log(`Removing event '${eventId}'`, { leave });
+    await removeIfExists("primary", eventId, accessToken);
   } else if (leave.status === "APPROVED" || leave.status === "PENDING") {
-    console.log(
-      `Upserting leave '${leave.uuid}' of user '${leave.userUuid}' from ${leave.startDay} to ${leave.endDay}`
-    );
-    await upsert(
-      "primary",
-      mapId(leave),
-      mapEventBody(leave, timeZone),
-      accessToken
-    );
+    const eventId = mapId(leave);
+    const eventBody = mapEventBody(leave, timeZone);
+    console.log(`Upserting event '${eventId}'`, { leave, event: eventBody });
+    await upsert("primary", eventId, eventBody, accessToken);
   } else {
     console.error("ERROR: couldn't update leave, status uknown", leave.status);
   }
