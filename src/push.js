@@ -33,17 +33,11 @@ function mapId(leave) {
 function mapEventBody(leave, timeZone) {
   return {
     start: {
-      dateTime: alibeezTimeToRealTime(
-        leave.startDay,
-        leave.startDayTime
-      ).toISOString(),
+      dateTime: alibeezTimeToRealTime(leave.startDay, leave.startDayTime),
       timeZone,
     },
     end: {
-      dateTime: alibeezTimeToRealTime(
-        leave.endDay,
-        leave.endDayTime
-      ).toISOString(),
+      dateTime: alibeezTimeToRealTime(leave.endDay, leave.endDayTime),
       timeZone,
     },
     summary: "Absence",
@@ -53,17 +47,11 @@ function mapEventBody(leave, timeZone) {
 
 function alibeezTimeToRealTime(alibeezDate, alibeezTime) {
   if (alibeezTime === "MORNING") {
-    const date = new Date(alibeezDate);
-    date.setHours(9);
-    return date;
+    return `${alibeezDate}T09:00:00`;
   } else if (alibeezTime === "NOON") {
-    const date = new Date(alibeezDate);
-    date.setHours(13);
-    return date;
+    return `${alibeezDate}T13:00:00`;
   } else if (alibeezTime === "EVENING") {
-    const date = new Date(alibeezDate);
-    date.setHours(18);
-    return date;
+    return `${alibeezDate}T18:00:00`;
   }
-  throw new Error(`invalid alibeez time: ${alibeezTime}`);
+  throw new Error(`invalid alibeez time: '${alibeezTime}'`);
 }
