@@ -18,7 +18,6 @@ export async function upsert(calendarId, eventId, eventBody, accessToken) {
       err instanceof HttpClientError &&
       [404, 410].includes(err.response.statusCode)
     ) {
-      console.log(err);
       return await insertEvent(
         calendarId,
         { id: eventId, ...eventBody },
