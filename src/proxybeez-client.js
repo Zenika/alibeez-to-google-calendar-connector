@@ -46,7 +46,7 @@ export async function queryLeavesByUpdateTimeGreaterOrEqualTo(updateDate) {
   );
 }
 
-export async function getUserByUsername(username) {
+export async function queryUserByUsername(username) {
   return query(
     `${PROXYBEEZ_QUERY_USER_BY_USERNAME_ENDPOINT}?username=${username}`
   );
