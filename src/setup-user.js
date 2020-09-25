@@ -16,7 +16,7 @@ export async function setupUser(code) {
   }
   const { timeZone } = await getPrimaryCalendar(tokens.access_token);
   const userResponse = await queryUserByUsername(claims.email);
-  const alibeezId = userResponse.result[0].uuid;
+  const alibeezId = userResponse[0].uuid;
   await saveUserInfo(alibeezId, {
     email: claims.email,
     alibeezId,

@@ -40,8 +40,8 @@ export async function syncIncremental() {
     console.error(`ERROR: Cannot query leaves from Proxybeez, aborting`, err);
     return;
   }
-  console.log(`Pulled '${updatedLeaves.result.length}' leaves from Proxybeez`);
-  for (const leave of updatedLeaves.result) {
+  console.log(`Pulled '${updatedLeaves.length}' leaves from Proxybeez`);
+  for (const leave of updatedLeaves) {
     let accessToken;
     try {
       accessToken = await fetchOrRenewAccessToken(leave.userUuid);
