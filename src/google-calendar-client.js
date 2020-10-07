@@ -1,5 +1,13 @@
 import { request, parseBodyAsJson } from "./http-client.js";
 
+const DRY_RUN = process.env.DRY_RUN === "true";
+
+if (DRY_RUN) {
+  console.warn(
+    "WARN: DRY_RUN is set to 'true'! Nothing will be written to Google Calendar."
+  );
+}
+
 const FLAG_CALENDAR_EVENTS_AS_TESTS =
   process.env.FLAG_CALENDAR_EVENTS_AS_TESTS === "true";
 
@@ -22,6 +30,9 @@ export async function getCalendar(calendarId, accessToken) {
 }
 
 export async function insertEvent(calendarId, eventBody, accessToken) {
+  if (DRY_RUN) {
+    return;
+  }
   if (FLAG_CALENDAR_EVENTS_AS_TESTS) {
     [eventBody] = flagAsTest(eventBody);
   }
@@ -39,6 +50,9 @@ export async function insertEvent(calendarId, eventBody, accessToken) {
 }
 
 export async function updateEvent(calendarId, eventId, eventBody, accessToken) {
+  if (DRY_RUN) {
+    return;
+  }
   if (FLAG_CALENDAR_EVENTS_AS_TESTS) {
     [eventBody, eventId] = flagAsTest(eventBody, eventId);
   }
@@ -56,6 +70,9 @@ export async function updateEvent(calendarId, eventId, eventBody, accessToken) {
 }
 
 export async function removeEvent(calendarId, eventId, accessToken) {
+  if (DRY_RUN) {
+    return;
+  }
   const response = await request({
     url: `https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events/${eventId}`,
     method: "DELETE",
