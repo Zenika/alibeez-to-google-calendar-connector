@@ -1,6 +1,6 @@
 # Alibeez-to-Google-Calendar Connector
 
-Copies leaves from Alibeez to Google Calendar.
+Syncs leaves from Alibeez to Google Calendar.
 
 ## How it works
 
