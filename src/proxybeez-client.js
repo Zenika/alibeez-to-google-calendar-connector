@@ -36,7 +36,6 @@ export async function queryUser(username) {
 }
 
 async function query(url) {
-  console.log(url);
   const response = await request({
     url,
     method: "GET",
