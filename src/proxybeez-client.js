@@ -1,9 +1,6 @@
 import { parseBodyAsJson, request } from "./http-client.js";
 
-const {
-  PROXYBEEZ_API_ROOT_URL,
-  PROXYBEEZ_KEY,
-} = process.env;
+const { PROXYBEEZ_API_ROOT_URL, PROXYBEEZ_KEY } = process.env;
 
 if (!PROXYBEEZ_API_ROOT_URL) {
   throw new Error(
@@ -17,10 +14,7 @@ if (!PROXYBEEZ_KEY) {
   );
 }
 
-export async function queryUserLeavesAfter(
-  userUuid,
-  endDate
-) {
+export async function queryUserLeavesAfter(userUuid, endDate) {
   return query(
     `${PROXYBEEZ_API_ROOT_URL}/userLeavesAfter?userUuid=${userUuid}&endDate=${endDate}`
   );
@@ -33,9 +27,7 @@ export async function queryLeavesUpdatedSince(updateDate) {
 }
 
 export async function queryUser(username) {
-  return query(
-    `${PROXYBEEZ_API_ROOT_URL}/user?username=${username}`
-  );
+  return query(`${PROXYBEEZ_API_ROOT_URL}/user?username=${username}`);
 }
 
 async function query(endpointWithQueryParams) {
