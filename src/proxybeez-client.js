@@ -1,54 +1,40 @@
 import { parseBodyAsJson, request } from "./http-client.js";
 
 const {
-  PROXYBEEZ_QUERY_USER_BY_USERNAME_ENDPOINT,
-  PROXYBEEZ_QUERY_LEAVES_BY_END_DATE_ENDPOINT,
-  PROXYBEEZ_QUERY_LEAVES_BY_UPDATE_DATE_ENDPOINT,
-  PROXYBEEZ_SECRET,
+  PROXYBEEZ_API_ROOT_URL,
+  PROXYBEEZ_KEY,
 } = process.env;
 
-if (!PROXYBEEZ_QUERY_USER_BY_USERNAME_ENDPOINT) {
+if (!PROXYBEEZ_API_ROOT_URL) {
   throw new Error(
-    `environment variable PROXYBEEZ_QUERY_USER_BY_USERNAME_ENDPOINT: expected non-empty string but found '${PROXYBEEZ_QUERY_USER_BY_USERNAME_ENDPOINT}'`
+    `environment variable PROXYBEEZ_API_ROOT_URL: expected non-empty string but found '${PROXYBEEZ_API_ROOT_URL}'`
   );
 }
 
-if (!PROXYBEEZ_QUERY_LEAVES_BY_END_DATE_ENDPOINT) {
+if (!PROXYBEEZ_KEY) {
   throw new Error(
-    `environment variable PROXYBEEZ_QUERY_LEAVES_BY_END_DATE_ENDPOINT: expected non-empty string but found '${PROXYBEEZ_QUERY_LEAVES_BY_END_DATE_ENDPOINT}'`
+    `environment variable PROXYBEEZ_KEY: expected non-empty string`
   );
 }
 
-if (!PROXYBEEZ_QUERY_LEAVES_BY_UPDATE_DATE_ENDPOINT) {
-  throw new Error(
-    `environment variable PROXYBEEZ_QUERY_LEAVES_BY_UPDATE_DATE_ENDPOINT: expected non-empty string but found '${PROXYBEEZ_QUERY_LEAVES_BY_UPDATE_DATE_ENDPOINT}'`
-  );
-}
-
-if (!PROXYBEEZ_SECRET) {
-  throw new Error(
-    `environment variable PROXYBEEZ_SECRET: expected non-empty string`
-  );
-}
-
-export async function queryUserLeavesByEndTimeGreaterOrEqualTo(
+export async function queryUserLeavesAfter(
   userUuid,
   endDate
 ) {
   return query(
-    `${PROXYBEEZ_QUERY_LEAVES_BY_END_DATE_ENDPOINT}?userUuid=${userUuid}&endDate=${endDate}`
+    `${PROXYBEEZ_API_ROOT_URL}/userLeavesAfter?userUuid=${userUuid}&endDate=${endDate}`
   );
 }
 
-export async function queryLeavesByUpdateTimeGreaterOrEqualTo(updateDate) {
+export async function queryLeavesUpdatedSince(updateDate) {
   return query(
-    `${PROXYBEEZ_QUERY_LEAVES_BY_UPDATE_DATE_ENDPOINT}?updateDate=${updateDate}`
+    `${PROXYBEEZ_API_ROOT_URL}/leavesUpdatedSince?updateDate=${updateDate}`
   );
 }
 
-export async function queryUserByUsername(username) {
+export async function queryUser(username) {
   return query(
-    `${PROXYBEEZ_QUERY_USER_BY_USERNAME_ENDPOINT}?username=${username}`
+    `${PROXYBEEZ_API_ROOT_URL}/user?username=${username}`
   );
 }
 
@@ -56,7 +42,7 @@ async function query(endpointWithQueryParams) {
   const response = await request({
     url: endpointWithQueryParams,
     method: "GET",
-    headers: { Authorization: `Bearer ${PROXYBEEZ_SECRET}` },
+    headers: { Authorization: `Bearer ${PROXYBEEZ_KEY}` },
   });
   const responseBody = await parseBodyAsJson(response);
   return responseBody;

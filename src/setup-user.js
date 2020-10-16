@@ -6,7 +6,7 @@ import {
   saveAccessToken,
 } from "./persistence.js";
 import { getPrimaryCalendar } from "./google-calendar-actions.js";
-import { queryUserByUsername } from "./proxybeez-client.js";
+import { queryUser } from "./proxybeez-client.js";
 
 export async function setupUser(code) {
   const tokens = await exchangeCodeForTokens(code);
@@ -15,7 +15,7 @@ export async function setupUser(code) {
     return null;
   }
   const { timeZone } = await getPrimaryCalendar(tokens.access_token);
-  const userResponse = await queryUserByUsername(claims.email);
+  const userResponse = await queryUser(claims.email);
   const alibeezId = userResponse[0].uuid;
   await saveUserInfo(alibeezId, {
     email: claims.email,

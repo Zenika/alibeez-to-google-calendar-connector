@@ -6,7 +6,7 @@ import {
   saveAccessToken,
 } from "./persistence.js";
 import { pushToGoogleCalendar } from "./push.js";
-import { queryLeavesByUpdateTimeGreaterOrEqualTo } from "./proxybeez-client.js";
+import { queryLeavesUpdatedSince } from "./proxybeez-client.js";
 
 const { LATEST_SYNC_DATE_FILE_PATH } = process.env;
 if (!LATEST_SYNC_DATE_FILE_PATH) {
@@ -33,14 +33,14 @@ export async function syncIncremental() {
   console.log(`Ready to pull leaves updated since '${latestSyncDate}'`);
   let updatedLeaves;
   try {
-    updatedLeaves = await queryLeavesByUpdateTimeGreaterOrEqualTo(
+    updatedLeaves = await queryLeavesUpdatedSince(
       latestSyncDate.slice(0, -1)
     );
   } catch (err) {
-    console.error(`ERROR: Cannot query leaves from Proxybeez, aborting`, err);
+    console.error(`ERROR: Cannot query leaves from Alibeez, aborting`, err);
     return;
   }
-  console.log(`Pulled '${updatedLeaves.length}' leaves from Proxybeez`);
+  console.log(`Pulled '${updatedLeaves.length}' leaves from Alibeez`);
   for (const leave of updatedLeaves) {
     let accessToken;
     try {
