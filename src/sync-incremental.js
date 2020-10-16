@@ -1,12 +1,12 @@
 import * as fs from "fs";
 import { exchangeRefreshTokenForAccessToken } from "./google-oauth-client.js";
-import { queryLeaves } from "./alibeez-actions.js";
 import {
   fetchAccessToken,
   fetchRefreshToken,
   saveAccessToken,
 } from "./persistence.js";
 import { pushToGoogleCalendar } from "./push.js";
+import { queryLeavesUpdatedSince } from "./proxybeez-client.js";
 
 const { LATEST_SYNC_DATE_FILE_PATH } = process.env;
 if (!LATEST_SYNC_DATE_FILE_PATH) {
@@ -33,15 +33,13 @@ export async function syncIncremental() {
   console.log(`Ready to pull leaves updated since '${latestSyncDate}'`);
   let updatedLeaves;
   try {
-    updatedLeaves = await queryLeaves([
-      `updateDate>=${latestSyncDate.slice(0, -1)}`,
-    ]);
+    updatedLeaves = await queryLeavesUpdatedSince(latestSyncDate.slice(0, -1));
   } catch (err) {
     console.error(`ERROR: Cannot query leaves from Alibeez, aborting`, err);
     return;
   }
-  console.log(`Pulled '${updatedLeaves.result.length}' leaves from Alibeez`);
-  for (const leave of updatedLeaves.result) {
+  console.log(`Pulled '${updatedLeaves.length}' leaves from Alibeez`);
+  for (const leave of updatedLeaves) {
     let accessToken;
     try {
       accessToken = await fetchOrRenewAccessToken(leave.userUuid);
