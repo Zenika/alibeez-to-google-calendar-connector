@@ -1,12 +1,17 @@
 import { parseBodyAsJson, request } from "./http-client.js";
+import { createUrl } from "./utils/url.js";
 
-const { PROXYBEEZ_API_ROOT_URL, PROXYBEEZ_KEY } = process.env;
-
-if (!PROXYBEEZ_API_ROOT_URL) {
+/** @type {URL} */
+let PROXYBEEZ_API_ROOT_URL;
+try {
+  PROXYBEEZ_API_ROOT_URL = new URL(process.env.PROXYBEEZ_API_ROOT_URL);
+} catch (err) {
   throw new Error(
-    `environment variable PROXYBEEZ_API_ROOT_URL: expected non-empty string but found '${PROXYBEEZ_API_ROOT_URL}'`
+    `environment variable PROXYBEEZ_API_ROOT_URL: expected valid absolute URL but found '${PROXYBEEZ_API_ROOT_URL}'`
   );
 }
+
+const { PROXYBEEZ_KEY } = process.env;
 
 if (!PROXYBEEZ_KEY) {
   throw new Error(
@@ -16,23 +21,24 @@ if (!PROXYBEEZ_KEY) {
 
 export async function queryUserLeavesAfter(userUuid, endDate) {
   return query(
-    `${PROXYBEEZ_API_ROOT_URL}/userLeavesAfter?userUuid=${userUuid}&endDate=${endDate}`
+    createUrl(PROXYBEEZ_API_ROOT_URL, "/userLeavesAfter", { userUuid, endDate })
   );
 }
 
 export async function queryLeavesUpdatedSince(updateDate) {
   return query(
-    `${PROXYBEEZ_API_ROOT_URL}/leavesUpdatedSince?updateDate=${updateDate}`
+    createUrl(PROXYBEEZ_API_ROOT_URL, "/leavesUpdatedSince", { updateDate })
   );
 }
 
 export async function queryUser(username) {
-  return query(`${PROXYBEEZ_API_ROOT_URL}/user?username=${username}`);
+  return query(createUrl(PROXYBEEZ_API_ROOT_URL, "/user", { username }));
 }
 
-async function query(endpointWithQueryParams) {
+async function query(url) {
+  console.log(url);
   const response = await request({
-    url: endpointWithQueryParams,
+    url,
     method: "GET",
     headers: { Authorization: `Bearer ${PROXYBEEZ_KEY}` },
   });
