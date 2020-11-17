@@ -42,6 +42,9 @@ function mapEventBody(leave, timeZone) {
     },
     summary: "Absence",
     description: `Imported from Alibeez on ${new Date().toISOString()}`,
+    reminders: {
+      useDefault: false,
+    },
     extendedProperties: {
       shared: {
         source: "Alibeez",
