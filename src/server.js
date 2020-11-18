@@ -5,6 +5,7 @@ import { parseQuery } from "./utils/http.js";
 import { syncIncremental } from "./sync-incremental.js";
 import { syncInit } from "./sync-init.js";
 import { setupUser } from "./setup-user.js";
+import { homePageHandler } from "./home.js";
 
 const { ADMIN_SECRET, UNSECURE } = process.env;
 
@@ -24,7 +25,7 @@ export function createServer() {
   const inFlightStates = new Set();
   return http.createServer(async (req, res) => {
     if (req.method === "GET" && req.url === "/") {
-      homePage(req, res);
+      await homePageHandler(req, res);
     } else if (req.method === "GET" && req.url === "/oauth/authorize") {
       oauthAuthorizeHandler(req, res, inFlightStates);
     } else if (req.method === "GET" && req.url.startsWith("/oauth/callback")) {
@@ -40,21 +41,6 @@ export function createServer() {
       res.writeHead(404).end();
     }
   });
-}
-
-function homePage(req, res) {
-  res.writeHead(200);
-  res.write(
-    `<h1>I'm the Alibeez-to-Google-Calendar Connector</h1>
-    <p>I will synchronize your leaves of absence from Alibeez to Google Calendar.</p>
-    <p>
-      More precisely, when you create a leave request in Alibeez, I will add a corresponding event in your primary calendar within the next hour.
-      It doesn't wait for the leave request to be validated. Furthermore, if you cancel a leave in Alibeez, the event will be removed from your calendar.
-    </p>
-    <p>For this to work, I need your permission to access your calendar.</p>
-    <a href="/oauth/authorize">Continue</a>`
-  );
-  res.end();
 }
 
 /**
