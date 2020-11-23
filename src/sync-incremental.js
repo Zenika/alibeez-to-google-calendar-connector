@@ -5,7 +5,7 @@ import {
   fetchRefreshToken,
   saveAccessToken,
 } from "./persistence.js";
-import { pushToGoogleCalendar } from "./push.js";
+import { pushToGoogleCalendar } from "./pushToGoogleCalendar.js";
 import { queryLeavesUpdatedSince } from "./proxybeez-client.js";
 
 const { LATEST_SYNC_DATE_FILE_PATH } = process.env;

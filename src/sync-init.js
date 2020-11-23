@@ -1,4 +1,4 @@
-import { pushToGoogleCalendar } from "./push.js";
+import { pushToGoogleCalendar } from "./pushToGoogleCalendar.js";
 import { queryUserLeavesAfter } from "./proxybeez-client.js";
 
 export async function syncInit(alibeezId, accessToken) {
