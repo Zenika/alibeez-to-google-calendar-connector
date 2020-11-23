@@ -1,12 +1,12 @@
 import { parseJwtClaims } from "./utils/jwt.js";
-import { exchangeCodeForTokens, claimsMatch } from "./google-oauth-client.js";
+import { exchangeCodeForTokens, claimsMatch } from "./googleOauthClient.js";
 import {
   saveUserInfo,
   saveRefreshToken,
   saveAccessToken,
 } from "./persistence.js";
-import { getPrimaryCalendar } from "./google-calendar-actions.js";
-import { queryUser } from "./proxybeez-client.js";
+import { getPrimaryCalendar } from "./googleCalendarActions.js";
+import { queryUser } from "./proxybeezClient.js";
 
 export async function setupUser(code) {
   const tokens = await exchangeCodeForTokens(code);

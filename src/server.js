@@ -1,9 +1,9 @@
 import * as http from "http";
-import { generateAuthUrl } from "./google-oauth-client.js";
+import { generateAuthUrl } from "./googleOauthClient.js";
 import { generateRandomState } from "./utils/state.js";
-import { syncIncremental } from "./sync-incremental.js";
-import { syncInit } from "./sync-init.js";
-import { setupUser } from "./setup-user.js";
+import { syncIncremental } from "./syncIncremental.js";
+import { syncInit } from "./syncInit.js";
+import { setupUser } from "./setupUser.js";
 import { homePageHandler } from "./pages/home.js";
 import { parseRequestUrl } from "./utils/parseRequestUrl.js";
 

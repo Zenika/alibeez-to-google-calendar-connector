@@ -3,7 +3,7 @@ import {
   updateEvent,
   removeEvent,
   getCalendar,
-} from "./google-calendar-client.js";
+} from "./googleCalendarClient.js";
 
 export async function getPrimaryCalendar(accessToken) {
   return await getCalendar("primary", accessToken);

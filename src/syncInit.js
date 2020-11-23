@@ -1,5 +1,5 @@
 import { pushToGoogleCalendar } from "./pushToGoogleCalendar.js";
-import { queryUserLeavesAfter } from "./proxybeez-client.js";
+import { queryUserLeavesAfter } from "./proxybeezClient.js";
 
 export async function syncInit(alibeezId, accessToken) {
   const today = new Date().toISOString().split("T")[0];

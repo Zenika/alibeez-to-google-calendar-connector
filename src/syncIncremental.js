@@ -1,12 +1,12 @@
 import * as fs from "fs";
-import { exchangeRefreshTokenForAccessToken } from "./google-oauth-client.js";
+import { exchangeRefreshTokenForAccessToken } from "./googleOauthClient.js";
 import {
   fetchAccessToken,
   fetchRefreshToken,
   saveAccessToken,
 } from "./persistence.js";
 import { pushToGoogleCalendar } from "./pushToGoogleCalendar.js";
-import { queryLeavesUpdatedSince } from "./proxybeez-client.js";
+import { queryLeavesUpdatedSince } from "./proxybeezClient.js";
 
 const { LATEST_SYNC_DATE_FILE_PATH } = process.env;
 if (!LATEST_SYNC_DATE_FILE_PATH) {

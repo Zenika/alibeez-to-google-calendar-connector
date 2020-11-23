@@ -1,4 +1,4 @@
-import { removeIfExists, upsert } from "./google-calendar-actions.js";
+import { removeIfExists, upsert } from "./googleCalendarActions.js";
 import { fetchUserInfo } from "./persistence.js";
 import {
   mapAlibeezLeaveToGoogleCalendarEventId,
