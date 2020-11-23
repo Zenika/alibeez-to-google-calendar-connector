@@ -4,7 +4,7 @@ import { generateRandomState } from "./utils/state.js";
 import { syncIncremental } from "./syncIncremental.js";
 import { syncInit } from "./syncInit.js";
 import { setupUser } from "./setupUser.js";
-import { homePageHandler } from "./pages/home.js";
+import { serveHtmlFile } from "./utils/serveHtmlFile.js";
 import { parseRequestUrl } from "./utils/parseRequestUrl.js";
 
 const { ADMIN_SECRET, UNSECURE } = process.env;
@@ -25,7 +25,7 @@ export function createServer() {
   const inFlightStates = new Set();
   return http.createServer(async (req, res) => {
     if (req.method === "GET" && req.url === "/") {
-      await homePageHandler(req, res);
+      await serveHtmlFile(res, "src/pages/home.html");
     } else if (req.method === "GET" && req.url === "/oauth/authorize") {
       oauthAuthorizeHandler(req, res, inFlightStates);
     } else if (req.method === "GET" && req.url.startsWith("/oauth/callback")) {
@@ -93,10 +93,7 @@ async function oauthCallbackHandler(req, res, inFlightStates) {
     }
     await syncInit(user.alibeezId, user.accessToken);
     res.writeHead(200);
-    res.write(
-      `<h1>I'm Alibeez-to-Google-Calendar Connector</h1>
-      <p>Success! I've started to copy over your current and future leaves to your calendar. I will update your calendar every hour, on the hour.</p>`
-    );
+    await serveHtmlFile(res, "src/pages/success.html");
     res.end();
   } catch (err) {
     console.error(`ERROR: Cannot handle OAuth callback`, err);

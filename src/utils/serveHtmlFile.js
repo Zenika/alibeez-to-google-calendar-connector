@@ -7,11 +7,11 @@ const pipelineAsync = promisify(pipeline);
 
 /**
  *
- * @param {http.IncomingMessage} req
  * @param {http.ServerResponse} res
+ * @param {string} htmlFilePath to the html file, relative to cwd
  */
-export async function homePageHandler(req, res) {
+export async function serveHtmlFile(res, htmlFilePath) {
   res.writeHead(200, { "Content-Type": "text/html" });
-  await pipelineAsync(createReadStream("src/pages/home.html"), res);
+  await pipelineAsync(createReadStream(htmlFilePath), res);
   res.end();
 }
