@@ -1,4 +1,4 @@
-import { parseBodyAsJson, request } from "./http-client.js";
+import { jsonProducingHttpRequest } from "./utils/jsonHttpClient.js";
 import { buildUrl } from "./utils/buildUrl.js";
 
 /** @type {URL} */
@@ -36,11 +36,8 @@ export async function queryUser(username) {
 }
 
 async function query(url) {
-  const response = await request({
-    url,
+  return await jsonProducingHttpRequest(url, {
     method: "GET",
     headers: { Authorization: `Bearer ${PROXYBEEZ_KEY}` },
   });
-  const responseBody = await parseBodyAsJson(response);
-  return responseBody;
 }

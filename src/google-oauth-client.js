@@ -1,5 +1,5 @@
 import * as querystring from "querystring";
-import { request, parseBodyAsJson } from "./http-client.js";
+import { jsonProducingHttpRequest } from "./utils/jsonHttpClient.js";
 
 const {
   GOOGLE_OAUTH2_CLIENT_ID,
@@ -59,38 +59,38 @@ export function claimsMatch(claims) {
 }
 
 export async function exchangeCodeForTokens(code) {
-  const response = await request({
-    url: `https://oauth2.googleapis.com/token`,
-    method: "POST",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
+  return await jsonProducingHttpRequest(
+    `https://oauth2.googleapis.com/token`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
     },
-    body: querystring.stringify({
+    querystring.stringify({
       client_id: GOOGLE_OAUTH2_CLIENT_ID,
       client_secret: GOOGLE_OAUTH2_CLIENT_SECRET,
       redirect_uri: GOOGLE_OAUTH2_CLIENT_REDIRECT_URI,
       grant_type: "authorization_code",
       code,
-    }),
-  });
-  const responseBody = await parseBodyAsJson(response);
-  return responseBody;
+    })
+  );
 }
 
 export async function exchangeRefreshTokenForAccessToken(refreshToken) {
-  const response = await request({
-    url: `https://oauth2.googleapis.com/token`,
-    method: "POST",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
+  return await jsonProducingHttpRequest(
+    `https://oauth2.googleapis.com/token`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
     },
-    body: querystring.stringify({
+    querystring.stringify({
       client_id: GOOGLE_OAUTH2_CLIENT_ID,
       client_secret: GOOGLE_OAUTH2_CLIENT_SECRET,
       grant_type: "refresh_token",
       refresh_token: refreshToken,
-    }),
-  });
-  const responseBody = await parseBodyAsJson(response);
-  return responseBody;
+    })
+  );
 }

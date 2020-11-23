@@ -1,4 +1,7 @@
-import { request, parseBodyAsJson } from "./http-client.js";
+import {
+  jsonExchangeHttpRequest,
+  jsonProducingHttpRequest,
+} from "./utils/jsonHttpClient.js";
 
 const DRY_RUN = process.env.DRY_RUN === "true";
 
@@ -18,15 +21,15 @@ if (FLAG_CALENDAR_EVENTS_AS_TESTS) {
 }
 
 export async function getCalendar(calendarId, accessToken) {
-  const response = await request({
-    url: `https://www.googleapis.com/calendar/v3/calendars/${calendarId}`,
-    method: "GET",
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
-  });
-  const responseBody = await parseBodyAsJson(response);
-  return responseBody;
+  return await jsonProducingHttpRequest(
+    `https://www.googleapis.com/calendar/v3/calendars/${calendarId}`,
+    {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    }
+  );
 }
 
 export async function insertEvent(calendarId, eventBody, accessToken) {
@@ -36,17 +39,17 @@ export async function insertEvent(calendarId, eventBody, accessToken) {
   if (FLAG_CALENDAR_EVENTS_AS_TESTS) {
     [eventBody] = flagAsTest(eventBody);
   }
-  const response = await request({
-    url: `https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events`,
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-      "Content-Type": "application/json",
+  return await jsonExchangeHttpRequest(
+    `https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
     },
-    body: JSON.stringify(eventBody),
-  });
-  const responseBody = await parseBodyAsJson(response);
-  return responseBody;
+    eventBody
+  );
 }
 
 export async function updateEvent(calendarId, eventId, eventBody, accessToken) {
@@ -56,32 +59,32 @@ export async function updateEvent(calendarId, eventId, eventBody, accessToken) {
   if (FLAG_CALENDAR_EVENTS_AS_TESTS) {
     [eventBody, eventId] = flagAsTest(eventBody, eventId);
   }
-  const response = await request({
-    url: `https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events/${eventId}`,
-    method: "PUT",
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-      "Content-Type": "application/json",
+  return await jsonExchangeHttpRequest(
+    `https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events/${eventId}`,
+    {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
     },
-    body: JSON.stringify(eventBody),
-  });
-  const responseBody = await parseBodyAsJson(response);
-  return responseBody;
+    eventBody
+  );
 }
 
 export async function removeEvent(calendarId, eventId, accessToken) {
   if (DRY_RUN) {
     return;
   }
-  const response = await request({
-    url: `https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events/${eventId}`,
-    method: "DELETE",
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
-  });
-  const responseBody = await parseBodyAsJson(response);
-  return responseBody;
+  return await jsonProducingHttpRequest(
+    `https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events/${eventId}`,
+    {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    }
+  );
 }
 
 function flagAsTest(eventBody, eventId) {
