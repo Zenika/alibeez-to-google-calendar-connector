@@ -1,5 +1,5 @@
 import { parseBodyAsJson, request } from "./http-client.js";
-import { createUrl } from "./utils/url.js";
+import { buildUrl } from "./utils/buildUrl.js";
 
 /** @type {URL} */
 let PROXYBEEZ_API_ROOT_URL;
@@ -21,18 +21,18 @@ if (!PROXYBEEZ_KEY) {
 
 export async function queryUserLeavesAfter(userUuid, endDate) {
   return query(
-    createUrl(PROXYBEEZ_API_ROOT_URL, "/userLeavesAfter", { userUuid, endDate })
+    buildUrl(PROXYBEEZ_API_ROOT_URL, "/userLeavesAfter", { userUuid, endDate })
   );
 }
 
 export async function queryLeavesUpdatedSince(updateDate) {
   return query(
-    createUrl(PROXYBEEZ_API_ROOT_URL, "/leavesUpdatedSince", { updateDate })
+    buildUrl(PROXYBEEZ_API_ROOT_URL, "/leavesUpdatedSince", { updateDate })
   );
 }
 
 export async function queryUser(username) {
-  return query(createUrl(PROXYBEEZ_API_ROOT_URL, "/user", { username }));
+  return query(buildUrl(PROXYBEEZ_API_ROOT_URL, "/user", { username }));
 }
 
 async function query(url) {

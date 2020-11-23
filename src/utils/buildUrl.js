@@ -5,7 +5,7 @@
  * @param {object} searchParams
  * @returns {URL}
  */
-export function createUrl(base, pathname, searchParams) {
+export function buildUrl(base, pathname, searchParams) {
   const baseUrl = new URL(base.toString());
   const url = new URL(baseUrl.pathname + pathname, base);
   const urlSearchParams = new URLSearchParams(searchParams);

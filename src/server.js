@@ -1,11 +1,11 @@
 import * as http from "http";
 import { generateAuthUrl } from "./google-oauth-client.js";
 import { generateRandomState } from "./utils/state.js";
-import { parseQuery } from "./utils/http.js";
 import { syncIncremental } from "./sync-incremental.js";
 import { syncInit } from "./sync-init.js";
 import { setupUser } from "./setup-user.js";
 import { homePageHandler } from "./home.js";
+import { parseRequestUrl } from "./utils/parseRequestUrl.js";
 
 const { ADMIN_SECRET, UNSECURE } = process.env;
 
@@ -73,12 +73,15 @@ async function oauthAuthorizeHandler(req, res, inFlightStates) {
  */
 async function oauthCallbackHandler(req, res, inFlightStates) {
   try {
-    const { code, state, error } = parseQuery(req.url);
-    if (!inFlightStates.has(Number(state))) {
+    const requestUrl = parseRequestUrl(req.url);
+    const state = Number(requestUrl.searchParams.get("state"));
+    const error = requestUrl.searchParams.get("error");
+    const code = requestUrl.searchParams.get("code");
+    if (!inFlightStates.has(state)) {
       res.writeHead(401).end();
       return;
     }
-    inFlightStates.delete(Number(state));
+    inFlightStates.delete(state);
     if (error) {
       res.writeHead(401).end();
       return;
