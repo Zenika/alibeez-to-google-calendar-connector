@@ -4,7 +4,7 @@ import { generateRandomState } from "./utils/state.js";
 import { syncIncremental } from "./sync-incremental.js";
 import { syncInit } from "./sync-init.js";
 import { setupUser } from "./setup-user.js";
-import { homePageHandler } from "./home.js";
+import { homePageHandler } from "./pages/home.js";
 import { parseRequestUrl } from "./utils/parseRequestUrl.js";
 
 const { ADMIN_SECRET, UNSECURE } = process.env;

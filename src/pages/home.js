@@ -12,6 +12,6 @@ const pipelineAsync = promisify(pipeline);
  */
 export async function homePageHandler(req, res) {
   res.writeHead(200, { "Content-Type": "text/html" });
-  await pipelineAsync(createReadStream("src/home.html"), res);
+  await pipelineAsync(createReadStream("src/pages/home.html"), res);
   res.end();
 }
