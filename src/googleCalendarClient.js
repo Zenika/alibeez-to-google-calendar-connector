@@ -88,7 +88,7 @@ export async function removeEvent(calendarId, eventId, accessToken) {
 }
 
 function flagAsTest(eventBody, eventId) {
-  const testEventId = eventId ? `test${eventId}` : eventId;
+  const testEventId = eventId;
   const testEventBody = {
     ...eventBody,
     summary: `[TEST 🙈] ${eventBody?.summary ?? ""}`,
