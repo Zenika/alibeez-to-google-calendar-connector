@@ -5,11 +5,11 @@ export function mapAlibeezLeaveToGoogleCalendarEventId(leave) {
 /**
  *
  * @param {*} leave
- * @param {{attendees: string[], timeZone: string}} userSettings
+ * @param {{attendees?: string[], timeZone: string}} userSettings
  */
 export function mapAlibeezLeaveToGoogleCalendarEventBody(
   leave,
-  { attendees, timeZone }
+  { attendees = [], timeZone } = { timeZone: "Europe/Paris" }
 ) {
   return {
     start: {
