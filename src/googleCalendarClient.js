@@ -92,6 +92,15 @@ function flagAsTest(eventBody, eventId) {
   const testEventBody = {
     ...eventBody,
     summary: `[TEST 🙈] ${eventBody?.summary ?? ""}`,
+    description: [
+      "// THIS IS A TEST AND CAN BE SAFELY IGNORED",
+      `// Attendees have been removed, but would have been: ${eventBody.attendees?.map(
+        ({ email }) => email
+      )}`,
+      "// Actual description follows:",
+      eventBody.description,
+    ].join("\n"),
+    attendees: [],
     extendedProperties: {
       ...eventBody?.extendedProperties,
       shared: {

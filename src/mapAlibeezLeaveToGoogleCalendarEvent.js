@@ -5,9 +5,12 @@ export function mapAlibeezLeaveToGoogleCalendarEventId(leave) {
 /**
  *
  * @param {*} leave
- * @param {string} timeZone
+ * @param {{attendees: string[], timeZone: string}} userSettings
  */
-export function mapAlibeezLeaveToGoogleCalendarEventBody(leave, timeZone) {
+export function mapAlibeezLeaveToGoogleCalendarEventBody(
+  leave,
+  { attendees, timeZone }
+) {
   return {
     start: {
       dateTime: alibeezTimeToRealTime(leave.startDay, leave.startDayTime),
@@ -22,6 +25,7 @@ export function mapAlibeezLeaveToGoogleCalendarEventBody(leave, timeZone) {
     reminders: {
       useDefault: false,
     },
+    attendees: attendees.map((attendee) => ({ email: attendee })),
     extendedProperties: {
       shared: {
         source: "Alibeez",
