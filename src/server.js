@@ -14,6 +14,7 @@ import {
   fetchUserInfo,
   saveUserInfo,
 } from "./persistence.js";
+import { renderView } from "./utils/renderView.js";
 
 const { ADMIN_SECRET, UNSECURE } = process.env;
 
@@ -89,18 +90,18 @@ async function oauthCallbackHandler(req, res, inFlightStates) {
     const error = requestUrl.searchParams.get("error");
     const code = requestUrl.searchParams.get("code");
     if (!inFlightStates.has(state)) {
-      res.writeHead(401).end();
-      return;
+      return await serveErrorPage(
+        res,
+        "This authentication attempt has expired! Please restart the authentication process."
+      );
     }
     inFlightStates.delete(state);
     if (error) {
-      res.writeHead(401).end();
-      return;
+      return await serveErrorPage(res, "Google returnded an error! " + error);
     }
     const user = await setupUser(code);
     if (!user) {
-      res.writeHead(401).end();
-      return;
+      return await serveErrorPage(res, "JWT claims did not match!");
     }
     setSessionCookie(res, user.alibeezId);
     // disable cache because this is an effectful operation, even though it is
@@ -121,11 +122,10 @@ async function oauthCallbackHandler(req, res, inFlightStates) {
  */
 async function getSettingsHandler(req, res) {
   const alibeezUserId = getSessionCookie(req);
-  if (alibeezUserId) {
-    await serveHtmlFile(res, "src/pages/settings.html");
-  } else {
-    res.writeHead(303, { Location: "/" }).end();
+  if (!alibeezUserId) {
+    return await serveErrorPage(res, "No authentication cookie found!");
   }
+  await serveHtmlFile(res, "src/pages/settings.html");
 }
 
 /**
@@ -136,7 +136,7 @@ async function getSettingsHandler(req, res) {
 async function postSettingsHandler(req, res) {
   const alibeezUserId = getSessionCookie(req);
   if (!alibeezUserId) {
-    return res.writeHead(401).end();
+    return await serveErrorPage(res, "No authentication cookie found!");
   }
   const { attendees: attendeesInput } = querystring.parse(
     await parseAsText(req)
@@ -159,11 +159,10 @@ async function postSettingsHandler(req, res) {
  */
 async function successPageHandler(req, res) {
   const alibeezUserId = getSessionCookie(req);
-  if (alibeezUserId) {
-    await serveHtmlFile(res, "src/pages/success.html");
-  } else {
-    res.writeHead(303, { Location: "/" }).end();
+  if (!alibeezUserId) {
+    return await serveErrorPage(res, "No authentication cookie found!");
   }
+  await serveHtmlFile(res, "src/pages/success.html");
 }
 
 /**
@@ -174,7 +173,7 @@ async function successPageHandler(req, res) {
 async function syncInitHandler(req, res) {
   const alibeezUserId = getSessionCookie(req);
   if (!alibeezUserId) {
-    res.writeHead(303, { Location: "/" }).end();
+    return await serveErrorPage(res, "No authentication cookie found!");
   }
   const { token } = await fetchAccessToken(alibeezUserId);
   await syncInit(alibeezUserId, token);
@@ -204,4 +203,12 @@ function isAdminRequest(req) {
     UNSECURE === "true" ||
     req.headers.authorization === `Bearer ${ADMIN_SECRET}`
   );
+}
+
+/**
+ * @param {http.ServerResponse} res
+ * @param {string} errorMessage
+ */
+async function serveErrorPage(res, errorMessage) {
+  return await renderView(res, "src/pages/error.html", { errorMessage }, 401);
 }

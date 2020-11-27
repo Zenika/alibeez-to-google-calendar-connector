@@ -8,7 +8,7 @@ const pipelineAsync = promisify(pipeline);
 /**
  *
  * @param {http.ServerResponse} res
- * @param {string} htmlFilePath to the html file, relative to cwd
+ * @param {string} htmlFilePath path to the html file, relative to cwd
  */
 export async function serveHtmlFile(res, htmlFilePath) {
   res.writeHead(200, { "Content-Type": "text/html" });
