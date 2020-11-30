@@ -9,7 +9,7 @@
     "dev": "nodemon --ignore data --require dotenv/config src/index.js",
     "start": "node src/index.js",
     "typecheck": "tsc",
-    "prettier": "prettier *.json .circleci/config.yml src/**/*.js",
+    "prettier": "prettier \"*.json\" \".circleci/config.yml\" \"src/**/*.js\"",
     "prettier:check": "npm run prettier -- --check",
     "prettier:write": "npm run prettier -- --write"
   },

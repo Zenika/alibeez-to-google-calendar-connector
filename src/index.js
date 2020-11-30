@@ -1,7 +1,7 @@
 import { createServer } from "./server.js";
 import { setupLogging } from "./setupLogging.js";
 
-setupLogging()
+setupLogging();
 
 const port = process.env.PORT || 3000;
 
