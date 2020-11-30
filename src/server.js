@@ -40,15 +40,15 @@ export function createServer() {
     } else if (req.url.startsWith("/oauth/callback")) {
       await oauthCallbackHandler(req, res, inFlightStates);
     } else if (req.method === "GET" && req.url === "/settings") {
-      await getSettingsHandler(req, res);
+      await authenticatedOnly(getSettingsHandler)(req, res);
     } else if (req.method === "POST" && req.url === "/settings") {
-      await postSettingsHandler(req, res);
+      await authenticatedOnly(postSettingsHandler)(req, res);
     } else if (req.url === "/success") {
-      await successPageHandler(req, res);
+      await authenticatedOnly(successPageHandler)(req, res);
     } else if (req.url.startsWith("/sync/init")) {
-      await syncInitHandler(req, res);
+      await authenticatedOnly(syncInitHandler)(req, res);
     } else if (req.url.startsWith("/sync/incremental")) {
-      await syncIncrementalHandler(req, res);
+      await adminOnly(syncIncrementalHandler)(req, res);
     } else {
       res.writeHead(404).end();
     }
@@ -121,10 +121,6 @@ async function oauthCallbackHandler(req, res, inFlightStates) {
  * @param {http.ServerResponse} res
  */
 async function getSettingsHandler(req, res) {
-  const alibeezUserId = getSessionCookie(req);
-  if (!alibeezUserId) {
-    return await serveErrorPage(res, "No authentication cookie found!");
-  }
   await serveHtmlFile(res, "src/pages/settings.html");
 }
 
@@ -132,12 +128,9 @@ async function getSettingsHandler(req, res) {
  *
  * @param {http.IncomingMessage} req
  * @param {http.ServerResponse} res
+ * @param {string} userId
  */
-async function postSettingsHandler(req, res) {
-  const alibeezUserId = getSessionCookie(req);
-  if (!alibeezUserId) {
-    return await serveErrorPage(res, "No authentication cookie found!");
-  }
+async function postSettingsHandler(req, res, userId) {
   const { attendees: attendeesInput } = querystring.parse(
     await parseAsText(req)
   );
@@ -147,8 +140,8 @@ async function postSettingsHandler(req, res) {
   )
     .split(",")
     .map((attendee) => attendee.trim());
-  const userInfo = await fetchUserInfo(alibeezUserId);
-  await saveUserInfo(alibeezUserId, { ...userInfo, attendees });
+  const userInfo = await fetchUserInfo(userId);
+  await saveUserInfo(userId, { ...userInfo, attendees });
   res.writeHead(303, { Location: "/sync/init" }).end();
 }
 
@@ -158,10 +151,6 @@ async function postSettingsHandler(req, res) {
  * @param {http.ServerResponse} res
  */
 async function successPageHandler(req, res) {
-  const alibeezUserId = getSessionCookie(req);
-  if (!alibeezUserId) {
-    return await serveErrorPage(res, "No authentication cookie found!");
-  }
   await serveHtmlFile(res, "src/pages/success.html");
 }
 
@@ -169,14 +158,11 @@ async function successPageHandler(req, res) {
  *
  * @param {http.IncomingMessage} req
  * @param {http.ServerResponse} res
+ * @param {string} userId
  */
-async function syncInitHandler(req, res) {
-  const alibeezUserId = getSessionCookie(req);
-  if (!alibeezUserId) {
-    return await serveErrorPage(res, "No authentication cookie found!");
-  }
-  const { token } = await fetchAccessToken(alibeezUserId);
-  await syncInit(alibeezUserId, token);
+async function syncInitHandler(req, res, userId) {
+  const { token } = await fetchAccessToken(userId);
+  await syncInit(userId, token);
   res.writeHead(303, { Location: "/success" }).end();
 }
 
@@ -186,9 +172,6 @@ async function syncInitHandler(req, res) {
  * @param {http.ServerResponse} res
  */
 async function syncIncrementalHandler(req, res) {
-  if (!isAdminRequest(req)) {
-    res.writeHead(401).end();
-  }
   try {
     await syncIncremental();
     res.writeHead(200).end();
@@ -198,17 +181,48 @@ async function syncIncrementalHandler(req, res) {
   }
 }
 
-function isAdminRequest(req) {
-  return (
-    UNSECURE === "true" ||
-    req.headers.authorization === `Bearer ${ADMIN_SECRET}`
-  );
-}
-
 /**
  * @param {http.ServerResponse} res
  * @param {string} errorMessage
  */
 async function serveErrorPage(res, errorMessage) {
   return await renderView(res, "src/pages/error.html", { errorMessage }, 401);
+}
+
+/**
+ * @param {(req: http.IncomingMessage, res: http.ServerResponse, userId: string) => void} handler
+ * @returns {http.RequestListener}
+ */
+function authenticatedOnly(handler) {
+  return async (req, res) => {
+    const alibeezUserId = getSessionCookie(req);
+    if (!alibeezUserId) {
+      return await serveErrorPage(res, "No authentication cookie found!");
+    }
+    return handler(req, res, alibeezUserId);
+  };
+}
+
+/**
+ * @param {http.RequestListener} handler
+ * @returns {http.RequestListener}
+ */
+function adminOnly(handler) {
+  return async (req, res) => {
+    if (!isAdminRequest(req)) {
+      return res.writeHead(401).end();
+    }
+    return handler(req, res);
+  };
+}
+
+/**
+ * @param {http.IncomingMessage} req
+ * @returns {boolean}
+ */
+function isAdminRequest(req) {
+  return (
+    UNSECURE === "true" ||
+    req.headers.authorization === `Bearer ${ADMIN_SECRET}`
+  );
 }
