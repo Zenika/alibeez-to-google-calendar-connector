@@ -197,7 +197,10 @@ function authenticatedOnly(handler) {
   return async (req, res) => {
     const alibeezUserId = getSessionCookie(req);
     if (!alibeezUserId) {
-      return await serveErrorPage(res, "No authentication cookie found!");
+      return await serveErrorPage(
+        res,
+        "No authentication cookie found! You could try to clear the cookies for this site and try again."
+      );
     }
     return handler(req, res, alibeezUserId);
   };
