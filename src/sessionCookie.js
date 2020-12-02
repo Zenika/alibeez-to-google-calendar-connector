@@ -36,12 +36,10 @@ export function setSessionCookie(res, alibeezUserId) {
  * @returns {string | undefined} alibeezUserId
  */
 export function getSessionCookie(req) {
-  const sessionCookie = req.headers["cookie"]?.split(";")?.find((cookie) => {
-    const trimmed = cookie.trim();
-    return (
-      trimmed.startsWith(COOKIE_NAME) && trimmed[COOKIE_NAME.length] === "="
-    );
-  });
+  const sessionCookie = req.headers["cookie"]
+    ?.split(";")
+    ?.map((cookie) => cookie.trim())
+    ?.find((cookie) => cookie.startsWith(COOKIE_NAME + "="));
   const userId = sessionCookie?.substring(COOKIE_NAME.length + 1);
   return KNOWN_USERS.get(userId);
 }
