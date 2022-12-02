@@ -44,7 +44,7 @@ workflows:
           context: clever-cloud2-zenika-dev
           filters:
             branches:
-              only: master
+              only: main
       - deploy:
           name: deploy-production
           clever-app-id: app_51d6df67-b2b9-4aa4-b285-b3ff167c54b9
