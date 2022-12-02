@@ -33,24 +33,29 @@ if (!ADMIN_SECRET && UNSECURE !== "true") {
 export function createServer() {
   const inFlightStates = new Set();
   return http.createServer(async (req, res) => {
-    if (req.url === "/") {
-      await serveHtmlFile(res, "src/pages/home.html");
-    } else if (req.url === "/oauth/authorize") {
-      await oauthAuthorizeHandler(req, res, inFlightStates);
-    } else if (req.url.startsWith("/oauth/callback")) {
-      await oauthCallbackHandler(req, res, inFlightStates);
-    } else if (req.method === "GET" && req.url === "/settings") {
-      await authenticatedOnly(getSettingsHandler)(req, res);
-    } else if (req.method === "POST" && req.url === "/settings") {
-      await authenticatedOnly(postSettingsHandler)(req, res);
-    } else if (req.url === "/success") {
-      await authenticatedOnly(successPageHandler)(req, res);
-    } else if (req.url.startsWith("/sync/init")) {
-      await authenticatedOnly(syncInitHandler)(req, res);
-    } else if (req.url.startsWith("/sync/incremental")) {
-      await adminOnly(syncIncrementalHandler)(req, res);
-    } else {
-      res.writeHead(404).end();
+    try {
+      if (req.url === "/") {
+        await serveHtmlFile(res, "src/pages/home.html");
+      } else if (req.url === "/oauth/authorize") {
+        await oauthAuthorizeHandler(req, res, inFlightStates);
+      } else if (req.url.startsWith("/oauth/callback")) {
+        await oauthCallbackHandler(req, res, inFlightStates);
+      } else if (req.method === "GET" && req.url === "/settings") {
+        await authenticatedOnly(getSettingsHandler)(req, res);
+      } else if (req.method === "POST" && req.url === "/settings") {
+        await authenticatedOnly(postSettingsHandler)(req, res);
+      } else if (req.url === "/success") {
+        await authenticatedOnly(successPageHandler)(req, res);
+      } else if (req.url.startsWith("/sync/init")) {
+        await authenticatedOnly(syncInitHandler)(req, res);
+      } else if (req.url.startsWith("/sync/incremental")) {
+        await adminOnly(syncIncrementalHandler)(req, res);
+      } else {
+        res.writeHead(404).end();
+      }
+    } catch (err) {
+      console.error(err);
+      res.writeHead(500).end();
     }
   });
 }
