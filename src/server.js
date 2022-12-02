@@ -144,7 +144,8 @@ async function postSettingsHandler(req, res, userId) {
     : attendeesInput[0]
   )
     .split(",")
-    .map((attendee) => attendee.trim());
+    .map((attendee) => attendee.trim())
+    .filter(Boolean);
   const userInfo = await fetchUserInfo(userId);
   await saveUserInfo(userId, { ...userInfo, attendees });
   res.writeHead(303, { Location: "/sync/init" }).end();

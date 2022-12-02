@@ -25,7 +25,9 @@ export function mapAlibeezLeaveToGoogleCalendarEventBody(
     reminders: {
       useDefault: false,
     },
-    attendees: attendees.map((attendee) => ({ email: attendee })),
+    attendees: attendees
+      .filter(Boolean)
+      .map((attendee) => ({ email: attendee })),
     extendedProperties: {
       shared: {
         source: "Alibeez",
