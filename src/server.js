@@ -7,13 +7,7 @@ import { setupUser } from "./setupUser.js";
 import { serveHtmlFile } from "./utils/serveHtmlFile.js";
 import { parseRequestUrl } from "./utils/parseRequestUrl.js";
 import { getSessionCookie, setSessionCookie } from "./sessionCookie.js";
-import { parseAsText } from "./utils/streams.js";
-import * as querystring from "querystring";
-import {
-  fetchAccessToken,
-  fetchUserInfo,
-  saveUserInfo,
-} from "./persistence.js";
+import { fetchAccessToken } from "./persistence.js";
 import { renderView } from "./utils/renderView.js";
 
 const { ADMIN_SECRET, UNSECURE } = process.env;
@@ -40,10 +34,6 @@ export function createServer() {
         await oauthAuthorizeHandler(req, res, inFlightStates);
       } else if (req.url.startsWith("/oauth/callback")) {
         await oauthCallbackHandler(req, res, inFlightStates);
-      } else if (req.method === "GET" && req.url === "/settings") {
-        await authenticatedOnly(getSettingsHandler)(req, res);
-      } else if (req.method === "POST" && req.url === "/settings") {
-        await authenticatedOnly(postSettingsHandler)(req, res);
       } else if (req.url === "/success") {
         await authenticatedOnly(successPageHandler)(req, res);
       } else if (req.url.startsWith("/sync/init")) {
@@ -112,43 +102,12 @@ async function oauthCallbackHandler(req, res, inFlightStates) {
     // disable cache because this is an effectful operation, even though it is
     // run on a GET
     res.setHeader("Cache-Control", "no-store; max-age=0;");
-    res.writeHead(303, { Location: "/settings" });
+    res.writeHead(303, { Location: "/sync/init" });
     res.end();
   } catch (err) {
     console.error(`ERROR: Cannot handle OAuth callback`, err);
     res.writeHead(500).end();
   }
-}
-
-/**
- *
- * @param {http.IncomingMessage} req
- * @param {http.ServerResponse} res
- */
-async function getSettingsHandler(req, res) {
-  await serveHtmlFile(res, "src/pages/settings.html");
-}
-
-/**
- *
- * @param {http.IncomingMessage} req
- * @param {http.ServerResponse} res
- * @param {string} userId
- */
-async function postSettingsHandler(req, res, userId) {
-  const { attendees: attendeesInput } = querystring.parse(
-    await parseAsText(req)
-  );
-  const attendees = (typeof attendeesInput === "string"
-    ? attendeesInput
-    : attendeesInput[0]
-  )
-    .split(",")
-    .map((attendee) => attendee.trim())
-    .filter(Boolean);
-  const userInfo = await fetchUserInfo(userId);
-  await saveUserInfo(userId, { ...userInfo, attendees });
-  res.writeHead(303, { Location: "/sync/init" }).end();
 }
 
 /**

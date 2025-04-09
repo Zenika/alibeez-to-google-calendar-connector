@@ -5,11 +5,11 @@ export function mapAlibeezLeaveToGoogleCalendarEventId(leave) {
 /**
  *
  * @param {*} leave
- * @param {{attendees?: string[], timeZone: string}} userSettings
+ * @param {{ timeZone: string}} userSettings
  */
 export function mapAlibeezLeaveToGoogleCalendarEventBody(
   leave,
-  { attendees = [], timeZone } = { timeZone: "Europe/Paris" }
+  { timeZone } = { timeZone: "Europe/Paris" }
 ) {
   return {
     start: {
@@ -20,14 +20,11 @@ export function mapAlibeezLeaveToGoogleCalendarEventBody(
       dateTime: alibeezTimeToRealTime(leave.endDay, leave.endDayTime),
       timeZone,
     },
-    summary: "Absence",
-    description: `Imported from Alibeez on ${new Date().toISOString()}`,
+    summary: `Absence (Imported from Alibeez on ${new Date().toISOString()})`,
     reminders: {
       useDefault: false,
     },
-    attendees: attendees
-      .filter(Boolean)
-      .map((attendee) => ({ email: attendee })),
+    eventType: "outOfOffice",
     extendedProperties: {
       shared: {
         source: "Alibeez",
